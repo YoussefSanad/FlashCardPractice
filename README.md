@@ -233,8 +233,7 @@ Current progress status per question.
 2. **Data Integrity** - Foreign key constraints ensure referential integrity
 3. **Performance** - Strategic indexes for common query patterns
 4. **Audit Trail** - Complete history of all practice attempts is preserved
-5. **Unique Questions** - Prevents duplicate flashcards while allowing same answers
-6. **Multi-User Ready** - Schema designed to support future user isolation
+5. **Multi-User Ready** - Schema designed to support future user isolation
 
 ## Business Rules
 
@@ -253,7 +252,6 @@ Current progress status per question.
 - Whitespace is trimmed from inputs
 
 ### Data Integrity
-- Prevent duplicate flashcards
 - Handle concurrent access gracefully
 - Maintain referential integrity through foreign keys
 - Atomic operations using database transactions
@@ -355,19 +353,3 @@ Enable debug mode for detailed error information:
 APP_DEBUG=true
 APP_ENV=local
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Write tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## Support
-
-For questions or issues, please create an issue in the repository or contact the development team.
