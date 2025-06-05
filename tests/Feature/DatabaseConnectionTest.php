@@ -79,14 +79,21 @@ class DatabaseConnectionTest extends TestCase
     }
 
     /**
-     * Test that migrations table exists (indicates database is properly set up).
+     * Test that migrations can be run (indicates database is properly set up).
      */
-    public function test_migrations_table_exists(): void
+    public function test_migrations_can_be_run(): void
     {
+        // For in-memory databases, we need to run migrations during the test
+        $this->artisan('migrate', ['--force' => true]);
+        
         $this->assertTrue(
             Schema::hasTable('migrations'),
-            'Migrations table does not exist. Have you run php artisan migrate?'
+            'Migrations table was not created after running migrations'
         );
+        
+        // Also check that our default Laravel tables were created
+        $this->assertTrue(Schema::hasTable('users'));
+        $this->assertTrue(Schema::hasTable('password_reset_tokens'));
     }
 
     /**
