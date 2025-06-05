@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Repositories\FlashcardRepository;
+use App\Repositories\EloquentFlashcardRepository;
+use App\Repositories\QuestionProgressRepository;
+use App\Repositories\EloquentQuestionProgressRepository;
+use App\Repositories\PracticeAttemptRepository;
+use App\Repositories\EloquentPracticeAttemptRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FlashcardRepository::class, EloquentFlashcardRepository::class);
+        $this->app->bind(QuestionProgressRepository::class, EloquentQuestionProgressRepository::class);
+        $this->app->bind(PracticeAttemptRepository::class, EloquentPracticeAttemptRepository::class);
     }
 
     /**
