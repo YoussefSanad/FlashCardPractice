@@ -6,7 +6,7 @@ use App\Models\QuestionProgress;
 
 interface QuestionProgressRepository
 {
-    public function create(int $flashcardId, string $userId, string $status, ?\DateTime $lastAttemptedAt = null): QuestionProgress;
+    public function create(int $flashcardId, string $userId, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): QuestionProgress;
     
     public function countNonNotAnsweredByUserId(string $userId): int;
     
@@ -14,5 +14,5 @@ interface QuestionProgressRepository
     
     public function findByFlashcardAndUser(int $flashcardId, string $userId): ?QuestionProgress;
     
-    public function updateProgress(QuestionProgress $progress, string $status, ?\DateTime $lastAttemptedAt = null): QuestionProgress;
+    public function updateProgress(QuestionProgress $progress, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): QuestionProgress;
 } 

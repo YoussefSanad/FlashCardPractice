@@ -10,7 +10,7 @@ class InMemoryQuestionProgressRepository implements QuestionProgressRepository
     private array $progressRecords = [];
     private int $nextId = 1;
 
-    public function create(int $flashcardId, string $userId, string $status, ?\DateTime $lastAttemptedAt = null): QuestionProgress
+    public function create(int $flashcardId, string $userId, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): QuestionProgress
     {
         $progress = new QuestionProgress([
             'flashcard_id' => $flashcardId,
@@ -66,7 +66,7 @@ class InMemoryQuestionProgressRepository implements QuestionProgressRepository
         return $updated;
     }
 
-    public function updateProgress(QuestionProgress $progress, string $status, ?\DateTime $lastAttemptedAt = null): QuestionProgress
+    public function updateProgress(QuestionProgress $progress, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): QuestionProgress
     {
         $progress->status = $status;
         $progress->last_attempted_at = $lastAttemptedAt;
