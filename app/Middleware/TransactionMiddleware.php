@@ -9,7 +9,7 @@ class TransactionMiddleware implements Middleware
 {
     public function execute($command, callable $next)
     {
-        return DB::transaction(function () use ($command, $next) {
+        return DB::transaction(callback: function () use ($command, $next) {
             return $next($command);
         });
     }
