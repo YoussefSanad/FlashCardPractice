@@ -6,7 +6,7 @@ use App\Models\QuestionProgress;
 
 class EloquentQuestionProgressRepository implements QuestionProgressRepository
 {
-    public function create(int $flashcardId, string $userId, string $status, ?\DateTime $lastAttemptedAt = null): QuestionProgress
+    public function create(int $flashcardId, string $userId, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): QuestionProgress
     {
         return QuestionProgress::create([
             'flashcard_id' => $flashcardId,
@@ -38,7 +38,7 @@ class EloquentQuestionProgressRepository implements QuestionProgressRepository
             ->first();
     }
 
-    public function updateProgress(QuestionProgress $progress, string $status, ?\DateTime $lastAttemptedAt = null): QuestionProgress
+    public function updateProgress(QuestionProgress $progress, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): QuestionProgress
     {
         $progress->update([
             'status' => $status,

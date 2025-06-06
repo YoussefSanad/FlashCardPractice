@@ -2,36 +2,37 @@
 
 namespace App\Commands;
 
+use App\Exceptions\EmptyAnswer;
+use App\Exceptions\FlashcardNotFound;
+use App\Exceptions\InvalidFlashcardId;
+use App\Exceptions\QuestionAlreadyAnswered;
 use App\Models\QuestionProgress;
 use App\Repositories\FlashcardRepository;
 use App\Repositories\PracticeAttemptRepository;
 use App\Repositories\QuestionProgressRepository;
-use InvalidArgumentException;
+use App\Time\Clock;
 
 class SubmitAnswerHandler
 {
     public function __construct(
         private readonly FlashcardRepository $flashcards,
         private readonly PracticeAttemptRepository $practiceAttempts,
-        private readonly QuestionProgressRepository $questionProgress
+        private readonly QuestionProgressRepository $questionProgress,
+        private readonly Clock $clock
     ) {}
 
     public function handle(SubmitAnswer $command): array
     {
-        $this->validateCommand($command);
+        $this->validateInput($command);
 
         $flashcard = $this->flashcards->findById($command->flashcardId);
+        $progress = $this->questionProgress->findByFlashcardAndUser($command->flashcardId, $command->userId);
 
-        // Check if already answered correctly for this user
-        $progress = $this->questionProgress->findByFlashcardAndUser($flashcard->id, $command->userId);
-        if ($progress && $progress->status === QuestionProgress::STATUS_CORRECT) {
-            throw new InvalidArgumentException('This question has already been answered correctly and cannot be practiced again.');
-        }
+        $this->validateBusinessRules($flashcard, $progress, $command->flashcardId);
 
         $userAnswer = trim($command->userAnswer);
         $isCorrect = strcasecmp($userAnswer, $flashcard->answer) === 0;
 
-        // Create practice attempt record
         $attempt = $this->practiceAttempts->create(
             $flashcard->id,
             $command->userId,
@@ -39,31 +40,38 @@ class SubmitAnswerHandler
             $isCorrect
         );
 
-        // Update or create progress record
         $newStatus = $isCorrect ? QuestionProgress::STATUS_CORRECT : QuestionProgress::STATUS_INCORRECT;
-        $lastAttemptedAt = new \DateTime();
-
         if ($progress) {
-            $this->questionProgress->updateProgress($progress, $newStatus, $lastAttemptedAt);
+            $this->questionProgress->updateProgress($progress, $newStatus, $this->clock->now());
         } else {
-            $this->questionProgress->create($flashcard->id, $command->userId, $newStatus, $lastAttemptedAt);
+            $this->questionProgress->create($flashcard->id, $command->userId, $newStatus, $this->clock->now());
         }
 
         return [
             'attempt' => $attempt,
             'is_correct' => $isCorrect,
-            'correct_answer' => $flashcard->answer,
         ];
     }
 
-    private function validateCommand(SubmitAnswer $command): void
+    private function validateInput(SubmitAnswer $command): void
     {
         if ($command->flashcardId <= 0) {
-            throw new InvalidArgumentException('Invalid flashcard ID.');
+            throw new InvalidFlashcardId($command->flashcardId);
         }
 
         if (empty(trim($command->userAnswer))) {
-            throw new InvalidArgumentException('Answer cannot be empty.');
+            throw new EmptyAnswer();
+        }
+    }
+
+    private function validateBusinessRules(?object $flashcard, ?object $progress, int $flashcardId): void
+    {
+        if ($flashcard === null) {
+            throw new FlashcardNotFound($flashcardId);
+        }
+
+        if ($progress && $progress->status === QuestionProgress::STATUS_CORRECT) {
+            throw new QuestionAlreadyAnswered($flashcardId);
         }
     }
 }
