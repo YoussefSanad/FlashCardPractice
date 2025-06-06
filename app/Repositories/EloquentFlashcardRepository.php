@@ -6,7 +6,7 @@ use App\Models\Flashcard;
 
 class EloquentFlashcardRepository implements FlashcardRepository
 {
-    public function create(string $question, string $answer, string $userId): Flashcard
+    public function create(string $question, string $answer): Flashcard
     {
         return Flashcard::create([
             'question' => $question,
@@ -14,8 +14,8 @@ class EloquentFlashcardRepository implements FlashcardRepository
         ]);
     }
 
-    public function findById(int $id): Flashcard
+    public function findById(int $id): ?Flashcard
     {
-        return Flashcard::findOrFail($id);
+        return Flashcard::find($id);
     }
 } 

@@ -10,7 +10,7 @@ class InMemoryFlashcardRepository implements FlashcardRepository
     private array $flashcards = [];
     private int $nextId = 1;
 
-    public function create(string $question, string $answer, string $userId): Flashcard
+    public function create(string $question, string $answer): Flashcard
     {
         $flashcard = new Flashcard([
             'question' => $question,
@@ -25,7 +25,7 @@ class InMemoryFlashcardRepository implements FlashcardRepository
         return $flashcard;
     }
 
-    public function findById(int $id): Flashcard
+    public function findById(int $id): ?Flashcard
     {
         foreach ($this->flashcards as $flashcard) {
             if ($flashcard->id === $id) {
@@ -33,7 +33,7 @@ class InMemoryFlashcardRepository implements FlashcardRepository
             }
         }
         
-        throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Flashcard not found');
+        return null;
     }
 
     public function getAll(): array
