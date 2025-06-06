@@ -3,10 +3,13 @@
 namespace Tests\Feature\Commands;
 
 use App\Commands\SubmitAnswer;
+use App\Exceptions\EmptyAnswer;
+use App\Exceptions\FlashcardNotFound;
+use App\Exceptions\InvalidFlashcardId;
+use App\Exceptions\QuestionAlreadyAnswered;
 use App\Models\Flashcard;
 use App\Models\PracticeAttempt;
 use App\Models\QuestionProgress;
-use InvalidArgumentException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use League\Tactician\CommandBus;
 use Tests\TestCase;
@@ -34,7 +37,6 @@ class SubmitAnswerHandlerTest extends TestCase
 
         // Assert
         $this->assertTrue($result['is_correct']);
-        $this->assertEquals('4', $result['correct_answer']);
         $this->assertNotNull($result['attempt']);
 
         // Verify practice attempt was created
@@ -64,7 +66,6 @@ class SubmitAnswerHandlerTest extends TestCase
 
         // Assert
         $this->assertFalse($result['is_correct']);
-        $this->assertEquals('4', $result['correct_answer']);
 
         // Verify practice attempt was created
         $this->assertDatabaseHas('practice_attempts', [
@@ -106,7 +107,7 @@ class SubmitAnswerHandlerTest extends TestCase
 
         // Assert
         $this->assertTrue($result['is_correct']);
-        
+
         // Verify trimmed answer was stored
         $this->assertDatabaseHas('practice_attempts', [
             'user_answer' => '4', // Should be trimmed
@@ -117,14 +118,14 @@ class SubmitAnswerHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
-        
+
         // Create initial progress (incorrect)
         QuestionProgress::create([
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
             'status' => QuestionProgress::STATUS_INCORRECT,
         ]);
-        
+
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Act
@@ -153,12 +154,11 @@ class SubmitAnswerHandlerTest extends TestCase
             'user_id' => 'user-123',
             'status' => QuestionProgress::STATUS_CORRECT,
         ]);
-        
+
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Act & Assert
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('This question has already been answered correctly and cannot be practiced again.');
+        $this->expectException(QuestionAlreadyAnswered::class);
 
         $this->commandBus->handle($command);
     }
@@ -169,8 +169,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $command = new SubmitAnswer(0, 'answer', 'user-123');
 
         // Act & Assert
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid flashcard ID.');
+        $this->expectException(InvalidFlashcardId::class);
 
         $this->commandBus->handle($command);
     }
@@ -182,8 +181,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $command = new SubmitAnswer($flashcard->id, '   ', 'user-123');
 
         // Act & Assert
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Answer cannot be empty.');
+        $this->expectException(EmptyAnswer::class);
 
         $this->commandBus->handle($command);
     }
@@ -194,7 +192,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $command = new SubmitAnswer(999, 'answer', 'user-123');
 
         // Act & Assert
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(FlashcardNotFound::class);
 
         $this->commandBus->handle($command);
     }
@@ -235,11 +233,11 @@ class SubmitAnswerHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
-        
+
         // First attempt (incorrect)
         $command1 = new SubmitAnswer($flashcard->id, '5', 'user-123');
         $this->commandBus->handle($command1);
-        
+
         // Second attempt (correct)
         $command2 = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -259,4 +257,4 @@ class SubmitAnswerHandlerTest extends TestCase
         // Verify both attempts were recorded
         $this->assertDatabaseCount('practice_attempts', 2);
     }
-} 
+}

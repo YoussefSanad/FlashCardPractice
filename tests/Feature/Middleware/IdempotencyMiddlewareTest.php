@@ -176,15 +176,6 @@ class IdempotencyMiddlewareTest extends TestCase
         $this->assertDatabaseCount('flashcards', 2);
     }
 
-    public function test_query_commands_are_not_cached(): void
-    {
-        // This test would be more meaningful with actual query commands
-        // For now, we can verify that non-write commands bypass idempotency
-
-        // Since we only have write commands in this test app,
-        // we'll create a mock to simulate query behavior
-        $this->assertTrue(true, 'Query commands should bypass idempotency middleware');
-    }
 
     public function test_cached_result_preserves_model_state(): void
     {
@@ -201,7 +192,7 @@ class IdempotencyMiddlewareTest extends TestCase
 
         // Verify the cached model behaves like the original
         $this->assertInstanceOf(Flashcard::class, $secondResult);
-        $this->assertTrue($secondResult->exists, 'Cached model should be marked as existing');
+        $this->assertTrue($secondResult->exists, message: 'Cached model should be marked as existing');
         $this->assertEquals($firstResult->id, $secondResult->id);
         $this->assertEquals($firstResult->question, $secondResult->question);
         $this->assertEquals($firstResult->answer, $secondResult->answer);

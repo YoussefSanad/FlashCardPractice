@@ -245,7 +245,7 @@ class EloquentQuestionProgressRepositoryTest extends TestCase
         $flashcard = Flashcard::create(['question' => 'Q1', 'answer' => 'A1']);
         $progress = $this->repository->create($flashcard->id, 'user-1', QuestionProgress::STATUS_NOT_ANSWERED);
 
-        $lastAttemptedAt = new \DateTime();
+        $lastAttemptedAt = new \DateTimeImmutable();
         $updatedProgress = $this->repository->updateProgress($progress, QuestionProgress::STATUS_CORRECT, $lastAttemptedAt);
 
         $this->assertEquals($progress->id, $updatedProgress->id);
@@ -262,7 +262,7 @@ class EloquentQuestionProgressRepositoryTest extends TestCase
     public function test_can_update_progress_without_last_attempted_at(): void
     {
         $flashcard = Flashcard::create(['question' => 'Q1', 'answer' => 'A1']);
-        $progress = $this->repository->create($flashcard->id, 'user-1', QuestionProgress::STATUS_CORRECT, new \DateTime());
+        $progress = $this->repository->create($flashcard->id, 'user-1', QuestionProgress::STATUS_CORRECT, new \DateTimeImmutable());
 
         $updatedProgress = $this->repository->updateProgress($progress, QuestionProgress::STATUS_INCORRECT);
 
