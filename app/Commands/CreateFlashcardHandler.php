@@ -6,7 +6,6 @@ use App\Models\Flashcard;
 use App\Models\QuestionProgress;
 use App\Repositories\FlashcardRepository;
 use App\Repositories\QuestionProgressRepository;
-use Illuminate\Database\QueryException;
 use InvalidArgumentException;
 
 class CreateFlashcardHandler
@@ -21,8 +20,7 @@ class CreateFlashcardHandler
         $this->validateCommand($command);
         $flashcard = $this->flashcards->create(
             trim($command->question),
-            trim($command->answer),
-            $command->userId
+            trim($command->answer)
         );
 
         // Create initial progress record
