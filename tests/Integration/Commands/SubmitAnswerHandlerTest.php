@@ -2,12 +2,12 @@
 
 namespace Integration\Commands;
 
+use App\Commands\CreateFlashcard;
 use App\Commands\SubmitAnswer;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
 use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
-use App\Models\Flashcard;
 use App\Models\PracticeStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use League\Tactician\CommandBus;
@@ -28,7 +28,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_submit_correct_answer_successfully(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Act
@@ -57,7 +57,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_submit_incorrect_answer(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
         $command = new SubmitAnswer($flashcard->id, '5', 'user-123');
 
         // Act
@@ -84,7 +84,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_case_insensitive_answer_comparison(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is PHP?', 'answer' => 'A programming language']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is PHP?', 'A programming language', 'user-123'));
         $command = new SubmitAnswer($flashcard->id, 'a programming language', 'user-123');
 
         // Act
@@ -97,7 +97,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_trims_whitespace_from_answer(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
         $command = new SubmitAnswer($flashcard->id, '  4  ', 'user-123');
 
         // Act
@@ -114,14 +114,10 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_updates_existing_status_record(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
 
-        // Create initial status (incorrect)
-        PracticeStatus::create([
-            'flashcard_id' => $flashcard->id,
-            'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_INCORRECT,
-        ]);
+        // Create initial status (incorrect) by submitting a wrong answer first
+        $this->commandBus->handle(new SubmitAnswer($flashcard->id, '5', 'user-123'));
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -145,14 +141,12 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_throws_exception_for_already_correct_question(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
-        PracticeStatus::create([
-            'flashcard_id' => $flashcard->id,
-            'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_CORRECT,
-        ]);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
+        
+        // Create correct status by submitting correct answer first
+        $this->commandBus->handle(new SubmitAnswer($flashcard->id, '4', 'user-123'));
 
-        $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
+        $command = new SubmitAnswer($flashcard->id, ' 4 ', 'user-123'); // Different format to avoid idempotency cache
 
         // Act & Assert
         $this->expectException(QuestionAlreadyAnsweredCorrectly::class);
@@ -174,7 +168,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_throws_exception_for_empty_answer(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
         $command = new SubmitAnswer($flashcard->id, '   ', 'user-123');
 
         // Act & Assert
@@ -197,7 +191,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_handles_multiple_users_for_same_flashcard(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-1'));
         $command1 = new SubmitAnswer($flashcard->id, '4', 'user-1');
         $command2 = new SubmitAnswer($flashcard->id, '5', 'user-2');
 
@@ -229,7 +223,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_retry_incorrect_answer(): void
     {
         // Arrange
-        $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
 
         // First attempt (incorrect)
         $command1 = new SubmitAnswer($flashcard->id, '5', 'user-123');
