@@ -108,9 +108,6 @@ touch database/database.sqlite
 
 # Run migrations
 php artisan migrate
-
-# (Optional) Seed with sample data
-php artisan db:seed
 ```
 
 ### 3. Dependencies
@@ -139,13 +136,6 @@ The application uses the following key dependencies:
 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan migrate
 ./vendor/bin/sail artisan flashcard:interactive
-```
-
-### 🌱 Optional: Sample Data
-
-```bash
-# Add sample flashcards for testing
-./vendor/bin/sail artisan db:seed
 ```
 
 ### Sail Alias (Recommended)
@@ -177,90 +167,6 @@ sail composer install
 # Run tests
 sail test
 ```
-
-### Docker Services
-
-The Docker setup includes:
-
-- **Laravel Application** (PHP 8.4) - Main application container
-- **MySQL 8.0** - Database server
-- **Mailpit** - Email testing (for future features)
-
-### 🛠️ Useful Docker Commands
-
-```bash
-# 🚀 Container Management
-./vendor/bin/sail up -d          # Start containers in background
-./vendor/bin/sail down           # Stop containers
-./vendor/bin/sail restart        # Restart containers
-
-# 📱 Application Commands
-./vendor/bin/sail artisan flashcard:interactive  # Run flashcard app
-./vendor/bin/sail artisan migrate                # Run database migrations
-./vendor/bin/sail artisan db:seed                # Seed sample data
-
-# 🧪 Development & Testing
-./vendor/bin/sail test                           # Run tests
-./vendor/bin/sail artisan tinker                # Laravel REPL
-./vendor/bin/sail composer install              # Install PHP dependencies
-
-# 🔍 Debugging & Monitoring
-./vendor/bin/sail logs                           # View container logs
-./vendor/bin/sail shell                         # Access app container
-./vendor/bin/sail mysql                         # Access MySQL CLI
-
-# 🗑️ Reset Everything
-./vendor/bin/sail down --volumes               # Stop & remove data
-./vendor/bin/sail up -d                        # Start fresh
-./vendor/bin/sail artisan migrate              # Recreate database
-```
-
-### 💡 Pro Tip: Sail Alias
-
-Add this to your shell config (`~/.zshrc` or `~/.bashrc`):
-
-```bash
-alias sail="./vendor/bin/sail"
-```
-
-Then use `sail up -d` instead of `./vendor/bin/sail up -d`
-
-### 🚨 Troubleshooting
-
-**Problem: "Docker is not running"**
-```bash
-# Solution: Start Docker Desktop, then retry
-./vendor/bin/sail up -d
-```
-
-**Problem: "Port already in use"**
-```bash
-# Solution: Stop other services or change ports in .env
-APP_PORT=8080        # Change from default 80
-FORWARD_DB_PORT=3307 # Change from default 3306
-```
-
-**Problem: "Permission denied"**
-```bash
-# Solution: Fix file permissions
-sudo chown -R $USER:$USER .
-chmod +x ./vendor/bin/sail
-```
-
-**Problem: "Database connection refused"**
-```bash
-# Solution: Wait for MySQL to start, then retry
-./vendor/bin/sail logs mysql    # Check MySQL status
-./vendor/bin/sail artisan migrate
-```
-
-### 🌐 Access Points
-
-Once Docker is running, you can access:
-
-- **🖥️ Application**: http://localhost (Laravel app)
-- **🗄️ Database**: localhost:3306 (MySQL - user: `sail`, password: `password`)
-- **📧 Mailpit**: http://localhost:8025 (Email testing interface)
 
 ### ⚙️ Environment Configuration
 
@@ -297,15 +203,6 @@ php artisan flashcard:interactive
 5. **Reset** - Clear all practice progress
 6. **Exit** - Close the application
 
-### Practice Flow
-
-The practice mode follows a structured flow:
-
-1. **Progress Overview** - Shows current status of all questions
-2. **Question Selection** - Choose from available questions (excludes correctly answered)
-3. **Answer Submission** - Submit your answer and receive immediate feedback
-4. **Continuous Practice** - Return to progress overview for continued practice
-
 ## Architecture
 
 ### CQRS Implementation
@@ -334,33 +231,11 @@ The application implements CQRS (Command Query Responsibility Segregation) using
 
 ```
 app/
-├── Commands/                 # CQRS Commands
-│   ├── CreateFlashcardCommand.php
-│   ├── SubmitAnswerCommand.php
-│   ├── ResetProgressCommand.php
-│   └── Handlers/            # Command handlers
-│       ├── CreateFlashcardCommandHandler.php
-│       ├── SubmitAnswerCommandHandler.php
-│       └── ResetProgressCommandHandler.php
-├── Queries/                 # CQRS Queries
-│   ├── GetAllFlashcardsQuery.php
-│   ├── GetPracticeProgressQuery.php
-│   ├── GetStatsQuery.php
-│   ├── GetPracticeableQuestionsQuery.php
-│   └── Handlers/           # Query handlers
-│       ├── GetAllFlashcardsQueryHandler.php
-│       ├── GetPracticeProgressQueryHandler.php
-│       ├── GetStatsQueryHandler.php
-│       └── GetPracticeableQuestionsQueryHandler.php
-├── Models/                 # Eloquent models
-│   ├── Flashcard.php
-│   ├── PracticeAttempt.php
-│   └── QuestionProgress.php
-├── Console/Commands/       # Artisan commands
-│   └── FlashcardInteractiveCommand.php
-├── Providers/             # Service providers
-│   └── CqrsServiceProvider.php
-└── Services/              # Application services
+├── Commands/           # CQRS Commands & Handlers
+├── Queries/           # CQRS Queries & Handlers
+├── Models/            # Eloquent models
+├── Console/Commands/  # Artisan commands
+└── Providers/         # Service providers
 ```
 
 ## Database Structure
@@ -440,7 +315,6 @@ Current progress status per question.
 ### Validation Rules
 - Questions and answers cannot be empty
 - Questions must be unique
-- Maximum length: 65,535 characters for questions and answers
 - Case-insensitive answer comparison
 - Whitespace is trimmed from inputs
 
@@ -450,15 +324,6 @@ Current progress status per question.
 - Atomic operations using database transactions
 
 ## 🧪 Testing
-
-### ✅ Test Coverage
-
-The application includes comprehensive unit tests covering:
-
-- **Command Handlers** - All business logic, validation, and database interactions
-- **Query Handlers** - Data retrieval, filtering, and calculations
-- **Models** - Relationships, scopes, and model behavior
-- **Validation** - Input validation and error handling
 
 ### 🐳 Running Tests with Docker
 
@@ -487,12 +352,6 @@ The application includes comprehensive unit tests covering:
 ```bash
 # Run all tests
 php artisan test
-
-# Run only unit tests
-php artisan test --testsuite=Unit
-
-# Run with coverage (requires Xdebug)
-php artisan test --coverage
 ```
 
 ### 🗄️ Test Environment
@@ -508,11 +367,8 @@ php artisan test --coverage
 
 - **Arrange-Act-Assert** pattern for clear test structure
 - **Database transactions** for test isolation
-- **Mocking** for external dependencies
 - **Edge case testing** for validation logic
 - **Happy path and error scenarios** for comprehensive coverage
-
-## Development
 
 ### Adding New Features
 
@@ -535,34 +391,3 @@ php artisan test --coverage
 - Eager loading for relationships when needed
 - Efficient pagination for large datasets
 - Query optimization for statistics calculations
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Errors**
-   - Verify `.env` configuration
-   - Ensure database file exists (SQLite)
-   - Check database permissions
-
-2. **Migration Errors**
-   - Clear migration cache: `php artisan migrate:reset`
-   - Re-run migrations: `php artisan migrate`
-
-3. **Command Not Found**
-   - Clear application cache: `php artisan cache:clear`
-   - Regenerate autoload files: `composer dump-autoload`
-
-4. **Test Failures**
-   - Ensure test database is properly configured
-   - Check for conflicting data in test environment
-   - Verify all dependencies are installed
-
-### Debug Mode
-
-Enable debug mode for detailed error information:
-
-```env
-APP_DEBUG=true
-APP_ENV=local
-```
