@@ -3,7 +3,6 @@
 namespace App\Queries;
 
 use App\Repositories\FlashcardRepository;
-use App\Models\PracticeStatus;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetPracticeableQuestionsHandler
@@ -14,6 +13,6 @@ class GetPracticeableQuestionsHandler
 
     public function handle(GetPracticeableQuestions $query): Collection
     {
-        return $this->flashcards->all();
+        return $this->flashcards->getPracticable($query->userId);
     }
 }

@@ -34,13 +34,13 @@ class EloquentFlashcardRepository implements FlashcardRepository
 
     public function getWithStatus(string $userId): array
     {
-        $flashcards = Flashcard::with(['questionProgress' => function ($query) use ($userId) {
+        $flashcards = Flashcard::with(['practiceStatuses' => function ($query) use ($userId) {
             $query->where('user_id', $userId);
         }])->get();
 
         return $flashcards->map(function ($flashcard) use ($userId) {
-            $progress = $flashcard->questionProgress->first();
-            $status = $progress ? $progress->status : PracticeStatus::STATUS_NOT_ANSWERED;
+            $practiceStatus = $flashcard->practiceStatuses->first();
+            $status = $practiceStatus ? $practiceStatus->status : PracticeStatus::STATUS_NOT_ANSWERED;
 
             return new QuestionWithStatus(
                 flashcardId: $flashcard->id,
