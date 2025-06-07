@@ -9,7 +9,7 @@ class GetStatsHandler
 {
     public function __construct(
         private readonly FlashcardRepository $flashcards,
-        private readonly PracticeStatusRepository $questionProgress
+        private readonly PracticeStatusRepository $practiceStatuses
     ) {}
 
     public function handle(GetStats $query): array
@@ -26,8 +26,8 @@ class GetStatsHandler
             ];
         }
 
-        $attemptedCount = $this->questionProgress->countAllAttempts($query->userId);
-        $correctCount = $this->questionProgress->countCorrectAttempts($query->userId);
+        $attemptedCount = $this->practiceStatuses->countAllAttempts($query->userId);
+        $correctCount = $this->practiceStatuses->countCorrectAttempts($query->userId);
 
         $attemptedPercentage = round(($attemptedCount / $totalQuestions) * 100, 1);
         $correctPercentage = round(($correctCount / $totalQuestions) * 100, 1);

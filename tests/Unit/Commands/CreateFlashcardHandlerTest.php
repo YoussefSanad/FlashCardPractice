@@ -13,19 +13,19 @@ use Tests\Unit\Repositories\InMemoryPracticeStatusRepository;
 
 class CreateFlashcardHandlerTest extends TestCase
 {
-    private InMemoryFlashcardRepository $flashcardRepository;
-    private InMemoryPracticeStatusRepository $practiceStatusRepository;
+    private InMemoryFlashcardRepository $flashcards;
+    private InMemoryPracticeStatusRepository $practiceStatuses;
     private CreateFlashcardHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->flashcardRepository = new InMemoryFlashcardRepository();
-        $this->practiceStatusRepository = new InMemoryPracticeStatusRepository();
+        $this->flashcards = new InMemoryFlashcardRepository();
+        $this->practiceStatuses = new InMemoryPracticeStatusRepository();
         $this->handler = new CreateFlashcardHandler(
-            $this->flashcardRepository,
-            $this->practiceStatusRepository
+            $this->flashcards,
+            $this->practiceStatuses
         );
     }
 
@@ -55,7 +55,7 @@ class CreateFlashcardHandlerTest extends TestCase
 
         $flashcard = $this->handler->handle($command);
 
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(1, $progressRecords);
 
         $progress = $progressRecords[0];
@@ -193,7 +193,7 @@ class CreateFlashcardHandlerTest extends TestCase
 
         $this->assertNotEquals($flashcard1->id, $flashcard2->id);
 
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(2, $progressRecords);
 
         $this->assertEquals($flashcard1->id, $progressRecords[0]->flashcard_id);

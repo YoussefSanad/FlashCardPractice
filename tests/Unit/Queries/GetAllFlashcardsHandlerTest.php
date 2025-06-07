@@ -11,16 +11,16 @@ use Tests\Unit\Repositories\InMemoryFlashcardRepository;
 
 class GetAllFlashcardsHandlerTest extends TestCase
 {
-    private InMemoryFlashcardRepository $flashcardRepository;
+    private InMemoryFlashcardRepository $flashcards;
     private GetAllFlashcardsHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->flashcardRepository = new InMemoryFlashcardRepository();
+        $this->flashcards = new InMemoryFlashcardRepository();
         $this->handler = new GetAllFlashcardsHandler(
-            $this->flashcardRepository
+            $this->flashcards
         );
     }
 
@@ -38,9 +38,9 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_returns_all_flashcards_when_they_exist(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('What is PHP?', 'A programming language');
-        $flashcard2 = $this->flashcardRepository->create('What is Laravel?', 'A PHP framework');
-        $flashcard3 = $this->flashcardRepository->create('What is MySQL?', 'A database');
+        $flashcard1 = $this->flashcards->create('What is PHP?', 'A programming language');
+        $flashcard2 = $this->flashcards->create('What is Laravel?', 'A PHP framework');
+        $flashcard3 = $this->flashcards->create('What is MySQL?', 'A database');
 
         $query = new GetAllFlashcards('user-123');
 
@@ -71,7 +71,7 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_returns_flashcards_with_correct_data(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
 
         $query = new GetAllFlashcards('user-123');
 
@@ -90,7 +90,7 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_returns_single_flashcard(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('Single Question', 'Single Answer');
+        $flashcard = $this->flashcards->create('Single Question', 'Single Answer');
 
         $query = new GetAllFlashcards('user-456');
 
@@ -107,9 +107,9 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_handles_special_characters_in_flashcards(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('What is 2 + 2? (Basic math)', '4 (four)');
-        $flashcard2 = $this->flashcardRepository->create('Question with "quotes"', 'Answer with \'apostrophes\'');
-        $flashcard3 = $this->flashcardRepository->create('Question with émojis 🤔', 'Answer with émojis 😊');
+        $flashcard1 = $this->flashcards->create('What is 2 + 2? (Basic math)', '4 (four)');
+        $flashcard2 = $this->flashcards->create('Question with "quotes"', 'Answer with \'apostrophes\'');
+        $flashcard3 = $this->flashcards->create('Question with émojis 🤔', 'Answer with émojis 😊');
 
         $query = new GetAllFlashcards('user-special');
 
@@ -132,8 +132,8 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_user_id_does_not_affect_returned_flashcards(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('Question 1', 'Answer 1');
-        $flashcard2 = $this->flashcardRepository->create('Question 2', 'Answer 2');
+        $flashcard1 = $this->flashcards->create('Question 1', 'Answer 1');
+        $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Act - Different users should get the same flashcards
         $flashcardsUser1 = $this->handler->handle(new GetAllFlashcards('user-1'));
@@ -159,9 +159,9 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_returns_multiple_flashcards_in_creation_order(): void
     {
         // Arrange - Create flashcards in a specific order
-        $flashcard1 = $this->flashcardRepository->create('First Question', 'First Answer');
-        $flashcard2 = $this->flashcardRepository->create('Second Question', 'Second Answer');
-        $flashcard3 = $this->flashcardRepository->create('Third Question', 'Third Answer');
+        $flashcard1 = $this->flashcards->create('First Question', 'First Answer');
+        $flashcard2 = $this->flashcards->create('Second Question', 'Second Answer');
+        $flashcard3 = $this->flashcards->create('Third Question', 'Third Answer');
 
         $query = new GetAllFlashcards('user-order-test');
 
@@ -188,9 +188,9 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_collection_methods_work_correctly(): void
     {
         // Arrange
-        $this->flashcardRepository->create('Question A', 'Answer A');
-        $this->flashcardRepository->create('Question B', 'Answer B');
-        $this->flashcardRepository->create('Question C', 'Answer C');
+        $this->flashcards->create('Question A', 'Answer A');
+        $this->flashcards->create('Question B', 'Answer B');
+        $this->flashcards->create('Question C', 'Answer C');
 
         $query = new GetAllFlashcards('user-collection-test');
 
@@ -224,7 +224,7 @@ class GetAllFlashcardsHandlerTest extends TestCase
         $longQuestion = 'This is a very long question that contains multiple sentences and goes on for quite a while to test how the system handles longer text content. It includes various punctuation marks, numbers like 123, and special characters like @#$%^&*().';
         $longAnswer = 'This is an equally long answer that provides detailed information and explanations. It also contains multiple sentences, various punctuation marks, numbers, and special characters to ensure the system can handle complex text content properly.';
         
-        $flashcard = $this->flashcardRepository->create($longQuestion, $longAnswer);
+        $flashcard = $this->flashcards->create($longQuestion, $longAnswer);
 
         $query = new GetAllFlashcards('user-long-text');
 
@@ -243,7 +243,7 @@ class GetAllFlashcardsHandlerTest extends TestCase
     public function test_handles_empty_strings(): void
     {
         // Arrange - Create flashcard with empty strings (edge case)
-        $flashcard = $this->flashcardRepository->create('', '');
+        $flashcard = $this->flashcards->create('', '');
 
         $query = new GetAllFlashcards('user-empty');
 

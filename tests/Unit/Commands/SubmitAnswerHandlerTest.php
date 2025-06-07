@@ -19,9 +19,9 @@ use Tests\Unit\Time\FakeClock;
 
 class SubmitAnswerHandlerTest extends TestCase
 {
-    private InMemoryFlashcardRepository $flashcardRepository;
-    private InMemoryPracticeAttemptRepository $practiceAttemptRepository;
-    private InMemoryPracticeStatusRepository $practiceStatusRepository;
+    private InMemoryFlashcardRepository $flashcards;
+    private InMemoryPracticeAttemptRepository $practiceAttempts;
+    private InMemoryPracticeStatusRepository $practiceStatuses;
     private FakeClock $clock;
     private SubmitAnswerHandler $handler;
 
@@ -29,15 +29,15 @@ class SubmitAnswerHandlerTest extends TestCase
     {
         parent::setUp();
 
-        $this->flashcardRepository = new InMemoryFlashcardRepository();
-        $this->practiceAttemptRepository = new InMemoryPracticeAttemptRepository();
-        $this->practiceStatusRepository = new InMemoryPracticeStatusRepository();
+        $this->flashcards = new InMemoryFlashcardRepository();
+        $this->practiceAttempts = new InMemoryPracticeAttemptRepository();
+        $this->practiceStatuses = new InMemoryPracticeStatusRepository();
         $this->clock = new FakeClock(new DateTimeImmutable('2023-01-01 12:00:00'));
 
         $this->handler = new SubmitAnswerHandler(
-            $this->flashcardRepository,
-            $this->practiceAttemptRepository,
-            $this->practiceStatusRepository,
+            $this->flashcards,
+            $this->practiceAttempts,
+            $this->practiceStatuses,
             $this->clock
         );
     }
@@ -45,7 +45,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_submit_correct_answer_successfully(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Act
@@ -56,7 +56,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertInstanceOf(PracticeAttempt::class, $result['attempt']);
 
         // Verify practice attempt was created
-        $attempts = $this->practiceAttemptRepository->getAll();
+        $attempts = $this->practiceAttempts->getAll();
         $this->assertCount(1, $attempts);
         $attempt = $attempts[0];
         $this->assertEquals($flashcard->id, $attempt->flashcard_id);
@@ -65,7 +65,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($attempt->is_correct);
 
         // Verify progress was created with correct status
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(1, $progressRecords);
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
@@ -77,7 +77,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_submit_incorrect_answer(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command = new SubmitAnswer($flashcard->id, '5', 'user-123');
 
         // Act
@@ -88,7 +88,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertInstanceOf(PracticeAttempt::class, $result['attempt']);
 
         // Verify practice attempt was created
-        $attempts = $this->practiceAttemptRepository->getAll();
+        $attempts = $this->practiceAttempts->getAll();
         $this->assertCount(1, $attempts);
         $attempt = $attempts[0];
         $this->assertEquals($flashcard->id, $attempt->flashcard_id);
@@ -97,7 +97,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertFalse($attempt->is_correct);
 
         // Verify progress was created with incorrect status
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(1, $progressRecords);
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
@@ -108,7 +108,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_case_insensitive_answer_comparison(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is PHP?', 'A programming language');
+        $flashcard = $this->flashcards->create('What is PHP?', 'A programming language');
         $command = new SubmitAnswer($flashcard->id, 'a programming language', 'user-123');
 
         // Act
@@ -121,7 +121,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_trims_whitespace_from_answer(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command = new SubmitAnswer($flashcard->id, '  4  ', 'user-123');
 
         // Act
@@ -131,17 +131,17 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify trimmed answer was stored
-        $attempts = $this->practiceAttemptRepository->getAll();
+        $attempts = $this->practiceAttempts->getAll();
         $this->assertEquals('4', $attempts[0]->user_answer);
     }
 
     public function test_updates_existing_progress_record(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
 
         // Create initial progress (incorrect)
-        $this->practiceStatusRepository->create($flashcard->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -152,7 +152,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify progress was updated to correct
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(1, $progressRecords);
         $progress = $progressRecords[0];
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
@@ -162,8 +162,8 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_throws_exception_for_already_correct_question(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
-        $this->practiceStatusRepository->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
+        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -198,7 +198,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_throws_exception_for_empty_answer_with_whitespace(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command = new SubmitAnswer($flashcard->id, '   ', 'user-123');
 
         // Act & Assert
@@ -210,7 +210,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_throws_exception_for_empty_answer(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command = new SubmitAnswer($flashcard->id, '', 'user-123');
 
         // Act & Assert
@@ -233,7 +233,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_handles_multiple_users_for_same_flashcard(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command1 = new SubmitAnswer($flashcard->id, '4', 'user-1');
         $command2 = new SubmitAnswer($flashcard->id, '5', 'user-2');
 
@@ -246,24 +246,24 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertFalse($result2['is_correct']);
 
         // Verify separate progress records
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(2, $progressRecords);
 
-        $progress1 = $this->practiceStatusRepository->findByFlashcardAndUser($flashcard->id, 'user-1');
-        $progress2 = $this->practiceStatusRepository->findByFlashcardAndUser($flashcard->id, 'user-2');
+        $progress1 = $this->practiceStatuses->findByFlashcardAndUser($flashcard->id, 'user-1');
+        $progress2 = $this->practiceStatuses->findByFlashcardAndUser($flashcard->id, 'user-2');
 
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress1->status);
         $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $progress2->status);
 
         // Verify separate practice attempts
-        $attempts = $this->practiceAttemptRepository->getAll();
+        $attempts = $this->practiceAttempts->getAll();
         $this->assertCount(2, $attempts);
     }
 
     public function test_can_retry_incorrect_answer(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
 
         // First attempt (incorrect)
         $command1 = new SubmitAnswer($flashcard->id, '5', 'user-123');
@@ -279,18 +279,18 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify final progress is correct
-        $progress = $this->practiceStatusRepository->findByFlashcardAndUser($flashcard->id, 'user-123');
+        $progress = $this->practiceStatuses->findByFlashcardAndUser($flashcard->id, 'user-123');
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
 
         // Verify both attempts were recorded
-        $attempts = $this->practiceAttemptRepository->getAll();
+        $attempts = $this->practiceAttempts->getAll();
         $this->assertCount(2, $attempts);
     }
 
     public function test_handles_special_characters_in_answers(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2 + 2? (Basic math)', '4 (four)');
+        $flashcard = $this->flashcards->create('What is 2 + 2? (Basic math)', '4 (four)');
         $command = new SubmitAnswer($flashcard->id, '4 (four)', 'user-123');
 
         // Act
@@ -303,11 +303,11 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_creates_progress_when_none_exists(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Verify no progress exists initially
-        $this->assertCount(0, $this->practiceStatusRepository->getAll());
+        $this->assertCount(0, $this->practiceStatuses->getAll());
 
         // Act
         $result = $this->handler->handle($command);
@@ -316,7 +316,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify progress was created
-        $progressRecords = $this->practiceStatusRepository->getAll();
+        $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(1, $progressRecords);
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);

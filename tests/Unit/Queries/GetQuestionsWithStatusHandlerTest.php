@@ -12,20 +12,20 @@ use Tests\Unit\Repositories\InMemoryPracticeStatusRepository;
 
 class GetQuestionsWithStatusHandlerTest extends TestCase
 {
-    private InMemoryFlashcardRepository $flashcardRepository;
-    private InMemoryPracticeStatusRepository $practiceStatusRepository;
+    private InMemoryFlashcardRepository $flashcards;
+    private InMemoryPracticeStatusRepository $practiceStatuses;
     private GetQuestionsWithStatusHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->flashcardRepository = new InMemoryFlashcardRepository();
-        $this->practiceStatusRepository = new InMemoryPracticeStatusRepository();
-        $this->flashcardRepository->setPracticeStatusRepository($this->practiceStatusRepository);
+        $this->flashcards = new InMemoryFlashcardRepository();
+        $this->practiceStatuses = new InMemoryPracticeStatusRepository();
+        $this->flashcards->setPracticeStatusRepository($this->practiceStatuses);
         
         $this->handler = new GetQuestionsWithStatusHandler(
-            $this->flashcardRepository
+            $this->flashcards
         );
     }
 
@@ -42,8 +42,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_returns_questions_with_not_answered_status_by_default(): void
     {
         // Arrange - Create flashcards without any practice status
-        $flashcard1 = $this->flashcardRepository->create('What is PHP?', 'A programming language');
-        $flashcard2 = $this->flashcardRepository->create('What is Laravel?', 'A PHP framework');
+        $flashcard1 = $this->flashcards->create('What is PHP?', 'A programming language');
+        $flashcard2 = $this->flashcards->create('What is Laravel?', 'A PHP framework');
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -69,12 +69,12 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_returns_questions_with_correct_status(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('What is PHP?', 'A programming language');
-        $flashcard2 = $this->flashcardRepository->create('What is Laravel?', 'A PHP framework');
+        $flashcard1 = $this->flashcards->create('What is PHP?', 'A programming language');
+        $flashcard2 = $this->flashcards->create('What is Laravel?', 'A PHP framework');
 
         // Create practice statuses
-        $this->practiceStatusRepository->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatusRepository->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -91,13 +91,13 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_returns_questions_with_mixed_statuses(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('Question 1', 'Answer 1');
-        $flashcard2 = $this->flashcardRepository->create('Question 2', 'Answer 2');
-        $flashcard3 = $this->flashcardRepository->create('Question 3', 'Answer 3');
+        $flashcard1 = $this->flashcards->create('Question 1', 'Answer 1');
+        $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
+        $flashcard3 = $this->flashcards->create('Question 3', 'Answer 3');
 
         // Create mixed practice statuses
-        $this->practiceStatusRepository->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatusRepository->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
         // flashcard3 has no practice status (should default to NOT_ANSWERED)
 
         $query = new GetQuestionsWithStatus('user-123');
@@ -115,15 +115,15 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_isolates_questions_by_user_id(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('Question 1', 'Answer 1');
-        $flashcard2 = $this->flashcardRepository->create('Question 2', 'Answer 2');
+        $flashcard1 = $this->flashcards->create('Question 1', 'Answer 1');
+        $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Create practice statuses for different users
-        $this->practiceStatusRepository->create($flashcard1->id, 'user-1', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatusRepository->create($flashcard2->id, 'user-1', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-1', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-1', PracticeStatus::STATUS_CORRECT);
         
-        $this->practiceStatusRepository->create($flashcard1->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
-        $this->practiceStatusRepository->create($flashcard2->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
 
         // Act
         $questionsUser1 = $this->handler->handle(new GetQuestionsWithStatus('user-1'));
@@ -149,8 +149,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_returns_correct_question_data(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2+2?', '4');
-        $this->practiceStatusRepository->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $flashcard = $this->flashcards->create('What is 2+2?', '4');
+        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -170,11 +170,11 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_handles_user_with_no_practice_statuses(): void
     {
         // Arrange
-        $flashcard1 = $this->flashcardRepository->create('Question 1', 'Answer 1');
-        $flashcard2 = $this->flashcardRepository->create('Question 2', 'Answer 2');
+        $flashcard1 = $this->flashcards->create('Question 1', 'Answer 1');
+        $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Create practice statuses for different user only
-        $this->practiceStatusRepository->create($flashcard1->id, 'other-user', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'other-user', PracticeStatus::STATUS_CORRECT);
 
         $query = new GetQuestionsWithStatus('user-without-progress');
 
@@ -192,8 +192,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_handles_special_characters_in_questions(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('What is 2 + 2? (Basic math)', '4 (four)');
-        $this->practiceStatusRepository->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $flashcard = $this->flashcards->create('What is 2 + 2? (Basic math)', '4 (four)');
+        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -209,8 +209,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     public function test_question_with_status_status_method(): void
     {
         // Arrange
-        $flashcard = $this->flashcardRepository->create('Test Question', 'Test Answer');
-        $this->practiceStatusRepository->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $flashcard = $this->flashcards->create('Test Question', 'Test Answer');
+        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
