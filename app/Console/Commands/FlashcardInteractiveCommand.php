@@ -136,12 +136,16 @@ class FlashcardInteractiveCommand extends Command
     {
         while (true) {
             // Step 1: Show Progress
-            $this->showPracticeProgress();
+            $questions = $this->commandBus->handle(new GetQuestionsWithStatus($this->userId));
+            $this->showPracticeProgress($questions);
+            if (empty($questions)) {
+                return;
+            }
 
             // Step 2: Question Selection
-            $practiceableQuestions = $this->commandBus->handle(new GetPracticeableQuestions($this->userId));
+            $practicableQuestions = $this->commandBus->handle(new GetPracticeableQuestions($this->userId));
 
-            if ($practiceableQuestions->isEmpty()) {
+            if ($practicableQuestions->isEmpty()) {
                 $this->info('🎉 Congratulations! You have answered all questions correctly!');
                 return;
             }
@@ -150,7 +154,7 @@ class FlashcardInteractiveCommand extends Command
             $this->newLine();
 
             $questionOptions = [];
-            foreach ($practiceableQuestions as $index => $flashcard) {
+            foreach ($practicableQuestions as $index => $flashcard) {
                 $questionNumber = $index + 1;
                 $questionOptions[$questionNumber] = $flashcard;
                 $this->line("{$questionNumber}. " . $this->truncateText($flashcard->question, 80));
@@ -168,7 +172,7 @@ class FlashcardInteractiveCommand extends Command
             }
 
             if (!is_numeric($selection) || !isset($questionOptions[(int)$selection])) {
-                $this->error('Invalid selection. Please try again.');
+                $this->error(sprintf('Invalid selection. you have to choose a number between 1 and %d', count($questionOptions)));
                 continue;
             }
 
@@ -179,12 +183,11 @@ class FlashcardInteractiveCommand extends Command
         }
     }
 
-    private function showPracticeProgress(): void
+    private function showPracticeProgress(array $questions): void
     {
         $this->info('📊 Practice Progress');
         $this->newLine();
 
-        $questions = $this->commandBus->handle(new GetQuestionsWithStatus($this->userId));
         $stats = $this->commandBus->handle(new GetStats($this->userId));
 
         if (empty($questions)) {
@@ -264,8 +267,6 @@ class FlashcardInteractiveCommand extends Command
         $result = $this->commandBus->handle(new ResetProgress($this->userId));
 
         $this->info("✅ Progress reset successfully!");
-        $this->line("- Practice attempts deleted: {$result['attempts_deleted']}");
-        $this->line("- Progress records reset: {$result['progress_reset']}");
     }
 
     private function exitApplication(): void
