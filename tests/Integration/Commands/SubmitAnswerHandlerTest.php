@@ -6,7 +6,6 @@ use App\Commands\SubmitAnswer;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
-use App\Exceptions\QuestionAlreadyAnswered;
 use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
 use App\Models\Flashcard;
 use App\Models\PracticeStatus;
@@ -75,7 +74,6 @@ class SubmitAnswerHandlerTest extends TestCase
             'is_correct' => false,
         ]);
 
-        // Verify progress was created with incorrect status
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
@@ -108,18 +106,17 @@ class SubmitAnswerHandlerTest extends TestCase
         // Assert
         $this->assertTrue($result['is_correct']);
 
-        // Verify trimmed answer was stored
         $this->assertDatabaseHas('practice_attempts', [
             'user_answer' => '4', // Should be trimmed
         ]);
     }
 
-    public function test_updates_existing_progress_record(): void
+    public function test_updates_existing_status_record(): void
     {
         // Arrange
         $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
 
-        // Create initial progress (incorrect)
+        // Create initial status (incorrect)
         PracticeStatus::create([
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
@@ -134,14 +131,14 @@ class SubmitAnswerHandlerTest extends TestCase
         // Assert
         $this->assertTrue($result['is_correct']);
 
-        // Verify progress was updated to correct
+        // Verify status was updated to correct
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
             'status' => PracticeStatus::STATUS_CORRECT,
         ]);
 
-        // Should only have one progress record
+        // Should only have one status record
         $this->assertDatabaseCount('practice_statuses', 1);
     }
 
@@ -212,7 +209,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result1['is_correct']);
         $this->assertFalse($result2['is_correct']);
 
-        // Verify separate progress records
+        // Verify separate status records
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-1',
@@ -247,7 +244,7 @@ class SubmitAnswerHandlerTest extends TestCase
         // Assert
         $this->assertTrue($result['is_correct']);
 
-        // Verify final progress is correct
+        // Verify final status is correct
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
