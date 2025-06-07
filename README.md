@@ -216,7 +216,7 @@ The application implements CQRS (Command Query Responsibility Segregation) using
 
 #### Queries (Read Operations)
 - `GetAllFlashcardsQuery` - Retrieves all flashcards
-- `GetPracticeProgressQuery` - Gets current progress status
+- `GetQuestionsWithStatus` - Gets all quesitons with status
 - `GetStatsQuery` - Calculates practice statistics
 - `GetPracticeableQuestionsQuery` - Gets questions available for practice
 
