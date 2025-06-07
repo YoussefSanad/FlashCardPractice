@@ -206,7 +206,7 @@ Audit trail of all practice attempts.
 **Indexes:**
 - Composite index on `(flashcard_id, created_at)` for efficient querying
 
-#### 3. question_progress
+#### 3. practice_statuses
 Current progress status per question.
 
 | Column | Type | Description |

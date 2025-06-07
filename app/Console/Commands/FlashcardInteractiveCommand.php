@@ -7,7 +7,7 @@ use App\Commands\ResetProgress;
 use App\Commands\SubmitAnswer;
 use App\Queries\GetAllFlashcards;
 use App\Queries\GetPracticeableQuestions;
-use App\Queries\GetPracticeProgress;
+use App\Queries\GetQuestionsWithStatus;
 use App\Queries\GetStats;
 use Illuminate\Console\Command;
 use League\Tactician\CommandBus;
@@ -184,23 +184,24 @@ class FlashcardInteractiveCommand extends Command
         $this->info('📊 Practice Progress');
         $this->newLine();
 
-        $progressData = $this->commandBus->handle(new GetPracticeProgress($this->userId));
+        $questions = $this->commandBus->handle(new GetQuestionsWithStatus($this->userId));
+        $stats = $this->commandBus->handle(new GetStats($this->userId));
 
-        if (empty($progressData['progress'])) {
+        if (empty($questions)) {
             $this->warn('No flashcards found. Create some flashcards first!');
             return;
         }
 
         $tableData = [];
-        foreach ($progressData['progress'] as $progress) {
+        foreach ($questions as $questionWithStatus) {
             $tableData[] = [
-                'Question' => $this->truncateText($progress['question'], 60),
-                'Status' => $progress['status'],
+                'Question' => $this->truncateText($questionWithStatus->question, 60),
+                'Status' => $questionWithStatus->status(),
             ];
         }
 
         $this->table(['Question', 'Status'], $tableData);
-        $this->info("Completion: {$progressData['completion_percentage']}% ({$progressData['correct_answers']}/{$progressData['total_questions']})");
+        $this->info("Completion: {$stats['correct_percentage']}%");
         $this->newLine();
     }
 
@@ -254,14 +255,14 @@ class FlashcardInteractiveCommand extends Command
     private function resetProgress(): void
     {
         $this->warn('⚠️  This will reset all practice progress but keep your flashcards.');
-        
+
         if (!$this->confirm('Are you sure you want to reset all progress?')) {
             $this->info('Reset cancelled.');
             return;
         }
 
         $result = $this->commandBus->handle(new ResetProgress($this->userId));
-        
+
         $this->info("✅ Progress reset successfully!");
         $this->line("- Practice attempts deleted: {$result['attempts_deleted']}");
         $this->line("- Progress records reset: {$result['progress_reset']}");

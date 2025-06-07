@@ -1,10 +1,10 @@
 <?php
 
-namespace Feature\Middleware;
+namespace Integration\Middleware;
 
 use App\Commands\CreateFlashcard;
 use App\Models\Flashcard;
-use App\Models\QuestionProgress;
+use App\Models\PracticeStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use League\Tactician\CommandBus;
@@ -46,7 +46,7 @@ class MiddlewarePipelineIntegrationTest extends TestCase
         ]);
 
         // Verify progress record created (Handler working)
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $result1->id,
             'user_id' => 'pipeline-user',
             'status' => 'not_answered',
@@ -67,7 +67,7 @@ class MiddlewarePipelineIntegrationTest extends TestCase
 
         // Should not create duplicate records
         $this->assertDatabaseCount('flashcards', 1);
-        $this->assertDatabaseCount('question_progress', 1);
+        $this->assertDatabaseCount('practice_statuses', 1);
     }
 
     public function test_middleware_pipeline_handles_failures_correctly(): void
@@ -89,7 +89,7 @@ class MiddlewarePipelineIntegrationTest extends TestCase
         } catch (\InvalidArgumentException $e) {
             // Verify transaction rollback - no records should be created
             $this->assertDatabaseCount('flashcards', 0);
-            $this->assertDatabaseCount('question_progress', 0);
+            $this->assertDatabaseCount('practice_statuses', 0);
 
             // Re-throw to satisfy expectException
             throw $e;
@@ -119,7 +119,7 @@ class MiddlewarePipelineIntegrationTest extends TestCase
 
         // Should have 2 flashcards and 2 progress records (not 3)
         $this->assertDatabaseCount('flashcards', 2);
-        $this->assertDatabaseCount('question_progress', 2);
+        $this->assertDatabaseCount('practice_statuses', 2);
     }
 
     public function test_middleware_pipeline_preserves_model_relationships(): void
@@ -139,11 +139,11 @@ class MiddlewarePipelineIntegrationTest extends TestCase
         $this->assertInstanceOf(Flashcard::class, $flashcard);
 
         // Load the progress relationship
-        $flashcard->load('questionProgress');
-        $this->assertTrue($flashcard->questionProgress->isNotEmpty());
+        $flashcard->load('practiceStatuses');
+        $this->assertTrue($flashcard->practiceStatuses->isNotEmpty());
 
-        $progress = $flashcard->questionProgress->first();
-        $this->assertInstanceOf(QuestionProgress::class, $progress);
+        $progress = $flashcard->practiceStatuses->first();
+        $this->assertInstanceOf(PracticeStatus::class, $progress);
         $this->assertEquals('relationship-user', $progress->user_id);
         $this->assertEquals('not_answered', $progress->status);
         $this->assertEquals($flashcard->id, $progress->flashcard_id);

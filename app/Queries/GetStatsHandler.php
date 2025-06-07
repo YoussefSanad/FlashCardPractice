@@ -2,27 +2,32 @@
 
 namespace App\Queries;
 
-use App\Models\Flashcard;
-use App\Models\QuestionProgress;
+use App\Repositories\FlashcardRepository;
+use App\Repositories\PracticeStatusRepository;
 
 class GetStatsHandler
 {
+    public function __construct(
+        private readonly FlashcardRepository $flashcards,
+        private readonly PracticeStatusRepository $questionProgress
+    ) {}
+
     public function handle(GetStats $query): array
     {
-        $totalQuestions = Flashcard::count();
+        $totalQuestions = $this->flashcards->count();
 
         if ($totalQuestions === 0) {
             return [
                 'total_questions' => 0,
                 'attempted_percentage' => 0,
                 'correct_percentage' => 0,
+                'attempted_count' => 0,
+                'correct_count' => 0,
             ];
         }
 
-        $attemptedCount = QuestionProgress::where('user_id', $query->userId)
-            ->where('status', '!=', QuestionProgress::STATUS_NOT_ANSWERED)->count();
-        $correctCount = QuestionProgress::where('user_id', $query->userId)
-            ->where('status', QuestionProgress::STATUS_CORRECT)->count();
+        $attemptedCount = $this->questionProgress->countAllAttempts($query->userId);
+        $correctCount = $this->questionProgress->countCorrectAttempts($query->userId);
 
         $attemptedPercentage = round(($attemptedCount / $totalQuestions) * 100, 1);
         $correctPercentage = round(($correctCount / $totalQuestions) * 100, 1);

@@ -1,10 +1,13 @@
 <?php
 
-namespace Feature\Repositories;
+namespace Integration\Repositories;
 
 use App\Models\Flashcard;
+use App\Models\PracticeStatus;
 use App\Repositories\EloquentFlashcardRepository;
+use App\Repositories\EloquentPracticeStatusRepository;
 use App\Repositories\FlashcardRepository;
+use App\Repositories\PracticeStatusRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,11 +16,13 @@ class EloquentFlashcardRepositoryTest extends TestCase
     use RefreshDatabase;
 
     private FlashcardRepository $repository;
+    private PracticeStatusRepository $progressRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = new EloquentFlashcardRepository();
+        $this->progressRepository = new EloquentPracticeStatusRepository();
     }
 
     public function test_can_create_flashcard(): void
@@ -93,7 +98,36 @@ class EloquentFlashcardRepositoryTest extends TestCase
     public function test_find_by_id_returns_null_for_nonexistent_flashcard(): void
     {
         $result = $this->repository->findById(999);
-        
+
         $this->assertNull($result);
+    }
+
+    public function test_get_practicable_returns_flashcards_with_no_correct_answers(): void
+    {
+        // Create flashcards
+        $flashcard1 = $this->repository->create('Question 1', 'Answer 1');
+        $flashcard2 = $this->repository->create('Question 2', 'Answer 2');
+        $flashcard3 = $this->repository->create('Question 3', 'Answer 3');
+
+        $userId = 'user-123';
+        $this->progressRepository->create(
+            $flashcard1->id,
+            $userId,
+            PracticeStatus::STATUS_CORRECT
+        );
+
+        $this->progressRepository->create(
+            $flashcard2->id,
+            $userId,
+            PracticeStatus::STATUS_INCORRECT
+        );
+
+        // Get practicable flashcards (should exclude flashcard1 since it's correct)
+        $practicable = $this->repository->getPracticable($userId);
+
+        $this->assertCount(2, $practicable);
+        $this->assertTrue($practicable->contains('id', $flashcard2->id)); // incorrect - should be included
+        $this->assertTrue($practicable->contains('id', $flashcard3->id)); // no progress - should be included
+        $this->assertFalse($practicable->contains('id', $flashcard1->id)); // correct - should be excluded
     }
 }

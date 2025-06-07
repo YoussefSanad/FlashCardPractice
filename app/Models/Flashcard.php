@@ -27,36 +27,8 @@ class Flashcard extends Model
     /**
      * Get the current progress for this flashcard
      */
-    public function progress(): HasOne
+    public function practiceStatuses(): HasMany
     {
-        return $this->hasOne(QuestionProgress::class);
-    }
-
-    /**
-     * Get all question progress records for this flashcard
-     */
-    public function questionProgress(): HasMany
-    {
-        return $this->hasMany(QuestionProgress::class);
-    }
-
-    /**
-     * Scope to get flashcards that have been answered correctly
-     */
-    public function scopeCorrectlyAnswered($query)
-    {
-        return $query->whereHas('progress', function ($q) {
-            $q->where('status', 'correct');
-        });
-    }
-
-    /**
-     * Scope to get flashcards that can be practiced (not correctly answered)
-     */
-    public function scopePracticeable($query)
-    {
-        return $query->whereDoesntHave('progress', function ($q) {
-            $q->where('status', 'correct');
-        });
+        return $this->hasMany(PracticeStatus::class);
     }
 }

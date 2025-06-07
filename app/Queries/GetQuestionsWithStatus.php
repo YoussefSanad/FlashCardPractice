@@ -2,9 +2,9 @@
 
 namespace App\Queries;
 
-class GetPracticeProgress
+class GetQuestionsWithStatus
 {
     public function __construct(
         public readonly string $userId
     ) {}
-} 
+}

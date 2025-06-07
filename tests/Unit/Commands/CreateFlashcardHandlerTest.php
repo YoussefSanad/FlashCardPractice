@@ -5,16 +5,16 @@ namespace Tests\Unit\Commands;
 use App\Commands\CreateFlashcard;
 use App\Commands\CreateFlashcardHandler;
 use App\Models\Flashcard;
-use App\Models\QuestionProgress;
+use App\Models\PracticeStatus;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\Repositories\InMemoryFlashcardRepository;
-use Tests\Unit\Repositories\InMemoryQuestionProgressRepository;
+use Tests\Unit\Repositories\InMemoryPracticeStatusRepository;
 
 class CreateFlashcardHandlerTest extends TestCase
 {
     private InMemoryFlashcardRepository $flashcardRepository;
-    private InMemoryQuestionProgressRepository $questionProgressRepository;
+    private InMemoryPracticeStatusRepository $practiceStatusRepository;
     private CreateFlashcardHandler $handler;
 
     protected function setUp(): void
@@ -22,7 +22,7 @@ class CreateFlashcardHandlerTest extends TestCase
         parent::setUp();
 
         $this->flashcardRepository = new InMemoryFlashcardRepository();
-        $this->questionProgressRepository = new InMemoryQuestionProgressRepository();
+        $this->questionProgressRepository = new InMemoryPracticeStatusRepository();
         $this->handler = new CreateFlashcardHandler(
             $this->flashcardRepository,
             $this->questionProgressRepository
@@ -61,7 +61,7 @@ class CreateFlashcardHandlerTest extends TestCase
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
         $this->assertEquals('user-456', $progress->user_id);
-        $this->assertEquals(QuestionProgress::STATUS_NOT_ANSWERED, $progress->status);
+        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $progress->status);
     }
 
     public function test_trims_whitespace_from_question_and_answer(): void

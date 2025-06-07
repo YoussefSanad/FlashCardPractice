@@ -5,20 +5,20 @@ namespace App\Commands;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
-use App\Exceptions\QuestionAlreadyAnswered;
-use App\Models\QuestionProgress;
+use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
+use App\Models\PracticeStatus;
 use App\Repositories\FlashcardRepository;
 use App\Repositories\PracticeAttemptRepository;
-use App\Repositories\QuestionProgressRepository;
+use App\Repositories\PracticeStatusRepository;
 use App\Time\Clock;
 
 class SubmitAnswerHandler
 {
     public function __construct(
-        private readonly FlashcardRepository $flashcards,
+        private readonly FlashcardRepository       $flashcards,
         private readonly PracticeAttemptRepository $practiceAttempts,
-        private readonly QuestionProgressRepository $questionProgress,
-        private readonly Clock $clock
+        private readonly PracticeStatusRepository  $questionProgress,
+        private readonly Clock                     $clock
     ) {}
 
     public function handle(SubmitAnswer $command): array
@@ -40,7 +40,7 @@ class SubmitAnswerHandler
             $isCorrect
         );
 
-        $newStatus = $isCorrect ? QuestionProgress::STATUS_CORRECT : QuestionProgress::STATUS_INCORRECT;
+        $newStatus = $isCorrect ? PracticeStatus::STATUS_CORRECT : PracticeStatus::STATUS_INCORRECT;
         if ($progress) {
             $this->questionProgress->updateProgress($progress, $newStatus, $this->clock->now());
         } else {
@@ -70,8 +70,8 @@ class SubmitAnswerHandler
             throw new FlashcardNotFound($flashcardId);
         }
 
-        if ($progress && $progress->status === QuestionProgress::STATUS_CORRECT) {
-            throw new QuestionAlreadyAnswered($flashcardId);
+        if ($progress && $progress->status === PracticeStatus::STATUS_CORRECT) {
+            throw new QuestionAlreadyAnsweredCorrectly($flashcardId);
         }
     }
 }

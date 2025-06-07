@@ -3,16 +3,16 @@
 namespace App\Commands;
 
 use App\Models\Flashcard;
-use App\Models\QuestionProgress;
+use App\Models\PracticeStatus;
 use App\Repositories\FlashcardRepository;
-use App\Repositories\QuestionProgressRepository;
+use App\Repositories\PracticeStatusRepository;
 use InvalidArgumentException;
 
 class CreateFlashcardHandler
 {
     public function __construct(
         private readonly FlashcardRepository $flashcards,
-        private readonly QuestionProgressRepository $questionProgress
+        private readonly PracticeStatusRepository $questionProgress
     ) {}
 
     public function handle(CreateFlashcard $command): Flashcard
@@ -27,7 +27,7 @@ class CreateFlashcardHandler
         $this->questionProgress->create(
             $flashcard->id,
             $command->userId,
-            QuestionProgress::STATUS_NOT_ANSWERED
+            PracticeStatus::STATUS_NOT_ANSWERED
         );
 
         return $flashcard;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Repositories;
+namespace Integration\Repositories;
 
 use App\Models\Flashcard;
 use App\Models\PracticeAttempt;
@@ -189,4 +189,4 @@ class EloquentPracticeAttemptRepositoryTest extends TestCase
 
         $this->assertDatabaseCount('practice_attempts', 2);
     }
-} 
+}

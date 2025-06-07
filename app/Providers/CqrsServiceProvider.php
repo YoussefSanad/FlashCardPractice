@@ -15,8 +15,8 @@ use App\Queries\GetAllFlashcards;
 use App\Queries\GetAllFlashcardsHandler;
 use App\Queries\GetPracticeableQuestions;
 use App\Queries\GetPracticeableQuestionsHandler;
-use App\Queries\GetPracticeProgress;
-use App\Queries\GetPracticeProgressHandler;
+use App\Queries\GetQuestionsWithStatus;
+use App\Queries\GetQuestionsWithStatusHandler;
 use App\Queries\GetStats;
 use App\Queries\GetStatsHandler;
 use Illuminate\Support\ServiceProvider;
@@ -43,7 +43,7 @@ class CqrsServiceProvider extends ServiceProvider
 
             // Register query handlers
             $locator->addHandler($app->make(GetAllFlashcardsHandler::class), GetAllFlashcards::class);
-            $locator->addHandler($app->make(GetPracticeProgressHandler::class), GetPracticeProgress::class);
+            $locator->addHandler($app->make(GetQuestionsWithStatusHandler::class), GetQuestionsWithStatus::class);
             $locator->addHandler($app->make(GetStatsHandler::class), GetStats::class);
             $locator->addHandler($app->make(GetPracticeableQuestionsHandler::class), GetPracticeableQuestions::class);
 
@@ -66,7 +66,7 @@ class CqrsServiceProvider extends ServiceProvider
         $this->app->singleton(SubmitAnswerHandler::class);
         $this->app->singleton(ResetProgressHandler::class);
         $this->app->singleton(GetAllFlashcardsHandler::class);
-        $this->app->singleton(GetPracticeProgressHandler::class);
+        $this->app->singleton(GetQuestionsWithStatusHandler::class);
         $this->app->singleton(GetStatsHandler::class);
         $this->app->singleton(GetPracticeableQuestionsHandler::class);
     }

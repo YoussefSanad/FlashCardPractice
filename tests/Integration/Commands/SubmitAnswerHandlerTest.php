@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Feature\Commands;
+namespace Integration\Commands;
 
 use App\Commands\SubmitAnswer;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
 use App\Exceptions\QuestionAlreadyAnswered;
+use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
 use App\Models\Flashcard;
-use App\Models\PracticeAttempt;
-use App\Models\QuestionProgress;
+use App\Models\PracticeStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use League\Tactician\CommandBus;
 use Tests\TestCase;
@@ -48,10 +48,10 @@ class SubmitAnswerHandlerTest extends TestCase
         ]);
 
         // Verify progress was created with correct status
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => QuestionProgress::STATUS_CORRECT,
+            'status' => PracticeStatus::STATUS_CORRECT,
         ]);
     }
 
@@ -76,10 +76,10 @@ class SubmitAnswerHandlerTest extends TestCase
         ]);
 
         // Verify progress was created with incorrect status
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => QuestionProgress::STATUS_INCORRECT,
+            'status' => PracticeStatus::STATUS_INCORRECT,
         ]);
     }
 
@@ -120,10 +120,10 @@ class SubmitAnswerHandlerTest extends TestCase
         $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
 
         // Create initial progress (incorrect)
-        QuestionProgress::create([
+        PracticeStatus::create([
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => QuestionProgress::STATUS_INCORRECT,
+            'status' => PracticeStatus::STATUS_INCORRECT,
         ]);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
@@ -135,30 +135,30 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify progress was updated to correct
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => QuestionProgress::STATUS_CORRECT,
+            'status' => PracticeStatus::STATUS_CORRECT,
         ]);
 
         // Should only have one progress record
-        $this->assertDatabaseCount('question_progress', 1);
+        $this->assertDatabaseCount('practice_statuses', 1);
     }
 
     public function test_throws_exception_for_already_correct_question(): void
     {
         // Arrange
         $flashcard = Flashcard::create(['question' => 'What is 2+2?', 'answer' => '4']);
-        QuestionProgress::create([
+        PracticeStatus::create([
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => QuestionProgress::STATUS_CORRECT,
+            'status' => PracticeStatus::STATUS_CORRECT,
         ]);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Act & Assert
-        $this->expectException(QuestionAlreadyAnswered::class);
+        $this->expectException(QuestionAlreadyAnsweredCorrectly::class);
 
         $this->commandBus->handle($command);
     }
@@ -213,16 +213,16 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertFalse($result2['is_correct']);
 
         // Verify separate progress records
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-1',
-            'status' => QuestionProgress::STATUS_CORRECT,
+            'status' => PracticeStatus::STATUS_CORRECT,
         ]);
 
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-2',
-            'status' => QuestionProgress::STATUS_INCORRECT,
+            'status' => PracticeStatus::STATUS_INCORRECT,
         ]);
 
         // Verify separate practice attempts
@@ -248,10 +248,10 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify final progress is correct
-        $this->assertDatabaseHas('question_progress', [
+        $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => QuestionProgress::STATUS_CORRECT,
+            'status' => PracticeStatus::STATUS_CORRECT,
         ]);
 
         // Verify both attempts were recorded

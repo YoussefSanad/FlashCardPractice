@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Middleware;
+namespace Integration\Middleware;
 
 use App\Commands\CreateFlashcard;
 use Illuminate\Foundation\Testing\RefreshDatabase;

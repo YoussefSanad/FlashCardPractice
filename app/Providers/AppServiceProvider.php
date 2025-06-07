@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\FlashcardRepository;
 use App\Repositories\EloquentFlashcardRepository;
-use App\Repositories\QuestionProgressRepository;
-use App\Repositories\EloquentQuestionProgressRepository;
+use App\Repositories\PracticeStatusRepository;
+use App\Repositories\EloquentPracticeStatusRepository;
 use App\Repositories\PracticeAttemptRepository;
 use App\Repositories\EloquentPracticeAttemptRepository;
 use App\Time\Clock;
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(FlashcardRepository::class, EloquentFlashcardRepository::class);
-        $this->app->bind(QuestionProgressRepository::class, EloquentQuestionProgressRepository::class);
+        $this->app->bind(PracticeStatusRepository::class, EloquentPracticeStatusRepository::class);
         $this->app->bind(PracticeAttemptRepository::class, EloquentPracticeAttemptRepository::class);
         $this->app->bind(Clock::class, SystemClock::class);
     }
