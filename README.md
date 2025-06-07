@@ -13,7 +13,32 @@ A comprehensive flashcard practice application built with Laravel using CQRS (Co
 - 🏗️ **CQRS Architecture** - Clean separation of commands and queries
 - ✅ **Comprehensive Testing** - Full unit test coverage for business logic
 
-## Quick Start
+## 🚀 Quick Start
+
+### 🐳 Docker with Laravel Sail (Recommended) - Ready to Go!
+
+This project is **pre-configured** for Docker! Just clone and run:
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd FlashCardPractice
+
+# 2. Start Docker containers (Docker Desktop must be running)
+./vendor/bin/sail up -d
+
+# 3. Run database migrations
+./vendor/bin/sail artisan migrate
+
+# 4. Start the flashcard application
+./vendor/bin/sail artisan flashcard:interactive
+```
+
+**That's it!** 🎉 The `.env` file is already configured for Docker.
+
+### 💻 Local Development (Alternative)
+
+If you prefer to run without Docker:
 
 ```bash
 # Clone and setup
@@ -29,18 +54,29 @@ php artisan key:generate
 
 # Setup database (SQLite for development)
 touch database/database.sqlite
+# Update .env to use SQLite
+sed -i '' 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env
+sed -i '' 's/DB_HOST=mysql/#DB_HOST=mysql/' .env
+sed -i '' 's/DB_DATABASE=flash_card_practice/DB_DATABASE=database\/database.sqlite/' .env
+
+# Run migrations
 php artisan migrate
 
 # Start the interactive application
 php artisan flashcard:interactive
 ```
 
-## Requirements
+## 📋 Requirements
 
-- PHP 8.1+
-- Laravel 10.x
-- SQLite (development) / MySQL (production)
-- Composer
+### 🐳 Docker Development (Recommended & Pre-configured)
+- **Docker Desktop** - Download from [docker.com](https://www.docker.com/products/docker-desktop/)
+- **Git** - For cloning the repository
+
+### 💻 Local Development (Alternative)
+- **PHP 8.1+** with extensions: PDO, MySQL, SQLite
+- **Composer** - PHP dependency manager
+- **Laravel 10.x** (included in dependencies)
+- **Database**: SQLite (development) or MySQL (production)
 
 ## Installation & Setup
 
@@ -84,6 +120,163 @@ The application uses the following key dependencies:
 - **league/tactician** - CQRS command bus implementation
 - **Laravel Framework** - Core application framework
 - **PHPUnit** - Testing framework
+
+## 🐳 Docker Development with Laravel Sail
+
+### ✅ Pre-configured Setup
+
+**This project is ready for Docker out of the box!** No configuration needed.
+
+**What's included:**
+- ✅ `docker-compose.yml` - Laravel app + MySQL + Mailpit
+- ✅ `.env` file - Pre-configured for Docker
+- ✅ Laravel Sail - Installed and ready
+
+### 🚀 Getting Started
+
+```bash
+# Make sure Docker Desktop is running, then:
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan flashcard:interactive
+```
+
+### 🌱 Optional: Sample Data
+
+```bash
+# Add sample flashcards for testing
+./vendor/bin/sail artisan db:seed
+```
+
+### Sail Alias (Recommended)
+
+Add this alias to your shell configuration (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+alias sail="./vendor/bin/sail"
+```
+
+Then reload your shell:
+```bash
+source ~/.zshrc  # or ~/.bashrc
+```
+
+Now you can use `sail` instead of `./vendor/bin/sail`:
+
+```bash
+# Start services
+sail up -d
+
+# Run artisan commands
+sail artisan migrate
+sail artisan flashcard:interactive
+
+# Run composer commands
+sail composer install
+
+# Run tests
+sail test
+```
+
+### Docker Services
+
+The Docker setup includes:
+
+- **Laravel Application** (PHP 8.4) - Main application container
+- **MySQL 8.0** - Database server
+- **Mailpit** - Email testing (for future features)
+
+### 🛠️ Useful Docker Commands
+
+```bash
+# 🚀 Container Management
+./vendor/bin/sail up -d          # Start containers in background
+./vendor/bin/sail down           # Stop containers
+./vendor/bin/sail restart        # Restart containers
+
+# 📱 Application Commands
+./vendor/bin/sail artisan flashcard:interactive  # Run flashcard app
+./vendor/bin/sail artisan migrate                # Run database migrations
+./vendor/bin/sail artisan db:seed                # Seed sample data
+
+# 🧪 Development & Testing
+./vendor/bin/sail test                           # Run tests
+./vendor/bin/sail artisan tinker                # Laravel REPL
+./vendor/bin/sail composer install              # Install PHP dependencies
+
+# 🔍 Debugging & Monitoring
+./vendor/bin/sail logs                           # View container logs
+./vendor/bin/sail shell                         # Access app container
+./vendor/bin/sail mysql                         # Access MySQL CLI
+
+# 🗑️ Reset Everything
+./vendor/bin/sail down --volumes               # Stop & remove data
+./vendor/bin/sail up -d                        # Start fresh
+./vendor/bin/sail artisan migrate              # Recreate database
+```
+
+### 💡 Pro Tip: Sail Alias
+
+Add this to your shell config (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+alias sail="./vendor/bin/sail"
+```
+
+Then use `sail up -d` instead of `./vendor/bin/sail up -d`
+
+### 🚨 Troubleshooting
+
+**Problem: "Docker is not running"**
+```bash
+# Solution: Start Docker Desktop, then retry
+./vendor/bin/sail up -d
+```
+
+**Problem: "Port already in use"**
+```bash
+# Solution: Stop other services or change ports in .env
+APP_PORT=8080        # Change from default 80
+FORWARD_DB_PORT=3307 # Change from default 3306
+```
+
+**Problem: "Permission denied"**
+```bash
+# Solution: Fix file permissions
+sudo chown -R $USER:$USER .
+chmod +x ./vendor/bin/sail
+```
+
+**Problem: "Database connection refused"**
+```bash
+# Solution: Wait for MySQL to start, then retry
+./vendor/bin/sail logs mysql    # Check MySQL status
+./vendor/bin/sail artisan migrate
+```
+
+### 🌐 Access Points
+
+Once Docker is running, you can access:
+
+- **🖥️ Application**: http://localhost (Laravel app)
+- **🗄️ Database**: localhost:3306 (MySQL - user: `sail`, password: `password`)
+- **📧 Mailpit**: http://localhost:8025 (Email testing interface)
+
+### ⚙️ Environment Configuration
+
+✅ **No changes needed!** The `.env` file is pre-configured with:
+
+```env
+# Database (Docker-ready)
+DB_CONNECTION=mysql
+DB_HOST=mysql              # Docker service name
+DB_USERNAME=sail           # Sail default
+DB_PASSWORD=password       # Sail default
+
+# Mail testing (Docker-ready)
+MAIL_HOST=mailpit          # Docker service name
+MAIL_PORT=1025             # Mailpit port
+```
 
 ## Usage
 
@@ -256,9 +449,9 @@ Current progress status per question.
 - Maintain referential integrity through foreign keys
 - Atomic operations using database transactions
 
-## Testing
+## 🧪 Testing
 
-### Test Coverage
+### ✅ Test Coverage
 
 The application includes comprehensive unit tests covering:
 
@@ -267,7 +460,29 @@ The application includes comprehensive unit tests covering:
 - **Models** - Relationships, scopes, and model behavior
 - **Validation** - Input validation and error handling
 
-### Running Tests
+### 🐳 Running Tests with Docker
+
+```bash
+# Run all tests
+./vendor/bin/sail test
+
+# Run only unit tests
+./vendor/bin/sail test --testsuite=Unit
+
+# Run only integration tests
+./vendor/bin/sail test --testsuite=Integration
+
+# Run with coverage (requires Xdebug)
+./vendor/bin/sail test --coverage
+
+# Run specific test class
+./vendor/bin/sail test tests/Unit/CreateFlashcardCommandHandlerTest.php
+
+# Run tests in parallel (faster)
+./vendor/bin/sail test --parallel
+```
+
+### 💻 Running Tests Locally
 
 ```bash
 # Run all tests
@@ -278,14 +493,12 @@ php artisan test --testsuite=Unit
 
 # Run with coverage (requires Xdebug)
 php artisan test --coverage
-
-# Run specific test class
-php artisan test tests/Unit/CreateFlashcardCommandHandlerTest.php
 ```
 
-### Test Environment
+### 🗄️ Test Environment
 
-Tests use SQLite in-memory database for:
+**Docker**: Tests use MySQL test database automatically created by Sail
+**Local**: Tests use SQLite in-memory database for:
 - Fast execution
 - Isolation between tests
 - No external dependencies
