@@ -8,7 +8,6 @@ use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
 use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
-use App\Models\Flashcard;
 use App\Models\PracticeAttempt;
 use App\Models\PracticeStatus;
 use DateTimeImmutable;

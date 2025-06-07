@@ -22,10 +22,10 @@ class CreateFlashcardHandlerTest extends TestCase
         parent::setUp();
 
         $this->flashcardRepository = new InMemoryFlashcardRepository();
-        $this->questionProgressRepository = new InMemoryPracticeStatusRepository();
+        $this->practiceStatusRepository = new InMemoryPracticeStatusRepository();
         $this->handler = new CreateFlashcardHandler(
             $this->flashcardRepository,
-            $this->questionProgressRepository
+            $this->practiceStatusRepository
         );
     }
 
@@ -55,7 +55,7 @@ class CreateFlashcardHandlerTest extends TestCase
 
         $flashcard = $this->handler->handle($command);
 
-        $progressRecords = $this->questionProgressRepository->getAll();
+        $progressRecords = $this->practiceStatusRepository->getAll();
         $this->assertCount(1, $progressRecords);
 
         $progress = $progressRecords[0];
@@ -193,7 +193,7 @@ class CreateFlashcardHandlerTest extends TestCase
 
         $this->assertNotEquals($flashcard1->id, $flashcard2->id);
 
-        $progressRecords = $this->questionProgressRepository->getAll();
+        $progressRecords = $this->practiceStatusRepository->getAll();
         $this->assertCount(2, $progressRecords);
 
         $this->assertEquals($flashcard1->id, $progressRecords[0]->flashcard_id);

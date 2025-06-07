@@ -17,9 +17,9 @@ class ResetProgressHandlerTest extends TestCase
     {
         parent::setUp();
 
-        $this->questionProgressRepository = new InMemoryPracticeStatusRepository();
+        $this->practiceStatusRepository = new InMemoryPracticeStatusRepository();
         $this->handler = new ResetProgressHandler(
-            $this->questionProgressRepository
+            $this->practiceStatusRepository
         );
     }
 
@@ -29,9 +29,9 @@ class ResetProgressHandlerTest extends TestCase
         $userId = 'user-123';
 
         // Create progress records
-        $this->questionProgressRepository->create(1, $userId, PracticeStatus::STATUS_CORRECT);
-        $this->questionProgressRepository->create(2, $userId, PracticeStatus::STATUS_INCORRECT);
-        $this->questionProgressRepository->create(3, 'other-user', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatusRepository->create(1, $userId, PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatusRepository->create(2, $userId, PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatusRepository->create(3, 'other-user', PracticeStatus::STATUS_CORRECT);
 
         $command = new ResetProgress($userId);
 
@@ -39,7 +39,7 @@ class ResetProgressHandlerTest extends TestCase
         $this->handler->handle($command);
 
         // Assert - Verify progress is reset to not_answered
-        $allProgress = $this->questionProgressRepository->getAll();
+        $allProgress = $this->practiceStatusRepository->getAll();
         foreach ($allProgress as $progress) {
             if ($progress->user_id === $userId) {
                 $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $progress->status);
@@ -61,7 +61,7 @@ class ResetProgressHandlerTest extends TestCase
         $this->handler->handle($command);
 
         // Assert - No exception should be thrown, and no progress records should exist
-        $allProgress = $this->questionProgressRepository->getAll();
+        $allProgress = $this->practiceStatusRepository->getAll();
         $this->assertEmpty($allProgress);
     }
 
@@ -72,8 +72,8 @@ class ResetProgressHandlerTest extends TestCase
         $otherUser = 'other-user';
 
         // Create progress records for both users
-        $this->questionProgressRepository->create(1, $targetUser, PracticeStatus::STATUS_CORRECT);
-        $this->questionProgressRepository->create(2, $otherUser, PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatusRepository->create(1, $targetUser, PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatusRepository->create(2, $otherUser, PracticeStatus::STATUS_INCORRECT);
 
         $command = new ResetProgress($targetUser);
 
@@ -81,8 +81,8 @@ class ResetProgressHandlerTest extends TestCase
         $this->handler->handle($command);
 
         // Assert - Check progress records
-        $targetProgress = $this->questionProgressRepository->findByFlashcardAndUser(1, $targetUser);
-        $otherProgress = $this->questionProgressRepository->findByFlashcardAndUser(2, $otherUser);
+        $targetProgress = $this->practiceStatusRepository->findByFlashcardAndUser(1, $targetUser);
+        $otherProgress = $this->practiceStatusRepository->findByFlashcardAndUser(2, $otherUser);
 
         $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $targetProgress->status);
         $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $otherProgress->status);
@@ -94,8 +94,8 @@ class ResetProgressHandlerTest extends TestCase
         $userId = 'user-123';
 
         // Create progress records - some already not_answered
-        $this->questionProgressRepository->create(1, $userId, PracticeStatus::STATUS_NOT_ANSWERED);
-        $this->questionProgressRepository->create(2, $userId, PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatusRepository->create(1, $userId, PracticeStatus::STATUS_NOT_ANSWERED);
+        $this->practiceStatusRepository->create(2, $userId, PracticeStatus::STATUS_CORRECT);
 
         $command = new ResetProgress($userId);
 
@@ -103,7 +103,7 @@ class ResetProgressHandlerTest extends TestCase
         $this->handler->handle($command);
 
         // Assert - All records should be not_answered
-        $allProgress = $this->questionProgressRepository->getAll();
+        $allProgress = $this->practiceStatusRepository->getAll();
         foreach ($allProgress as $progress) {
             if ($progress->user_id === $userId) {
                 $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $progress->status);
