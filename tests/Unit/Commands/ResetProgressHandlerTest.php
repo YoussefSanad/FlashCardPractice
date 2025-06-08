@@ -30,9 +30,9 @@ class ResetProgressHandlerTest extends TestCase
         $userId = 'user-123';
 
         // Create progress records
-        $this->practiceStatuses->create(1, $userId, Status::CORRECT->value);
-        $this->practiceStatuses->create(2, $userId, Status::INCORRECT->value);
-        $this->practiceStatuses->create(3, 'other-user', Status::CORRECT->value);
+        $this->practiceStatuses->create(1, $userId, Status::CORRECT);
+        $this->practiceStatuses->create(2, $userId, Status::INCORRECT);
+        $this->practiceStatuses->create(3, 'other-user', Status::CORRECT);
 
         $command = new ResetProgress($userId);
 
@@ -73,8 +73,8 @@ class ResetProgressHandlerTest extends TestCase
         $otherUser = 'other-user';
 
         // Create progress records for both users
-        $this->practiceStatuses->create(1, $targetUser, Status::CORRECT->value);
-        $this->practiceStatuses->create(2, $otherUser, Status::INCORRECT->value);
+        $this->practiceStatuses->create(1, $targetUser, Status::CORRECT);
+        $this->practiceStatuses->create(2, $otherUser, Status::INCORRECT);
 
         $command = new ResetProgress($targetUser);
 
@@ -95,8 +95,8 @@ class ResetProgressHandlerTest extends TestCase
         $userId = 'user-123';
 
         // Create progress records - some already not_answered
-        $this->practiceStatuses->create(1, $userId, Status::NOT_ANSWERED->value);
-        $this->practiceStatuses->create(2, $userId, Status::CORRECT->value);
+        $this->practiceStatuses->create(1, $userId, Status::NOT_ANSWERED);
+        $this->practiceStatuses->create(2, $userId, Status::CORRECT);
 
         $command = new ResetProgress($userId);
 

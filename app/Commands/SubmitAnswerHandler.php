@@ -42,7 +42,7 @@ class SubmitAnswerHandler
             $isCorrect
         );
 
-        $newStatus = $isCorrect ? Status::CORRECT->value : Status::INCORRECT->value;
+        $newStatus = $isCorrect ? Status::CORRECT : Status::INCORRECT;
         if ($practiceStatus) {
             $this->practiceStatuses->updateStatus($practiceStatus, $newStatus, $this->clock->now());
         } else {

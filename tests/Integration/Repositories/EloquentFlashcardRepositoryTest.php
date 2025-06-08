@@ -114,13 +114,13 @@ class EloquentFlashcardRepositoryTest extends TestCase
         $this->progressRepository->create(
             $flashcard1->id,
             $userId,
-            Status::CORRECT->value
+            Status::CORRECT
         );
 
         $this->progressRepository->create(
             $flashcard2->id,
             $userId,
-            Status::INCORRECT->value
+            Status::INCORRECT
         );
 
         // Get practicable flashcards (should exclude flashcard1 since it's correct)

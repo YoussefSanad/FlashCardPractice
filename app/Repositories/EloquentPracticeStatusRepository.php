@@ -7,12 +7,12 @@ use App\Models\PracticeStatus;
 
 class EloquentPracticeStatusRepository implements PracticeStatusRepository
 {
-    public function create(int $flashcardId, string $userId, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
+    public function create(int $flashcardId, string $userId, Status $status, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
     {
         return PracticeStatus::create([
             'flashcard_id' => $flashcardId,
             'user_id' => $userId,
-            'status' => $status,
+            'status' => $status->value,
             'last_attempted_at' => $lastAttemptedAt,
         ]);
     }
@@ -39,10 +39,10 @@ class EloquentPracticeStatusRepository implements PracticeStatusRepository
             ->first();
     }
 
-    public function updateStatus(PracticeStatus $practiceStatus, string $newStatus, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
+    public function updateStatus(PracticeStatus $practiceStatus, Status $newStatus, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
     {
         $practiceStatus->update([
-            'status' => $newStatus,
+            'status' => $newStatus->value,
             'last_attempted_at' => $lastAttemptedAt,
         ]);
 

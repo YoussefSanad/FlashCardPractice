@@ -141,7 +141,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $flashcard = $this->flashcards->create('What is 2+2?', '4');
 
         // Create initial progress (incorrect)
-        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::INCORRECT);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -163,7 +163,7 @@ class SubmitAnswerHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('What is 2+2?', '4');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 

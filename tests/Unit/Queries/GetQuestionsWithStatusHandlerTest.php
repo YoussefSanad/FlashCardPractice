@@ -74,8 +74,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('What is Laravel?', 'A PHP framework');
 
         // Create practice statuses
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -97,8 +97,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard3 = $this->flashcards->create('Question 3', 'Answer 3');
 
         // Create mixed practice statuses
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT);
         // flashcard3 has no practice status (should default to NOT_ANSWERED)
 
         $query = new GetQuestionsWithStatus('user-123');
@@ -120,11 +120,11 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Create practice statuses for different users
-        $this->practiceStatuses->create($flashcard1->id, 'user-1', Status::CORRECT->value);
-        $this->practiceStatuses->create($flashcard2->id, 'user-1', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard1->id, 'user-1', Status::CORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-1', Status::CORRECT);
 
-        $this->practiceStatuses->create($flashcard1->id, 'user-2', Status::INCORRECT->value);
-        $this->practiceStatuses->create($flashcard2->id, 'user-2', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard1->id, 'user-2', Status::INCORRECT);
+        $this->practiceStatuses->create($flashcard2->id, 'user-2', Status::INCORRECT);
 
         // Act
         $questionsUser1 = $this->handler->handle(new GetQuestionsWithStatus('user-1'));
@@ -151,7 +151,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('What is 2+2?', '4');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -175,7 +175,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Create practice statuses for different user only
-        $this->practiceStatuses->create($flashcard1->id, 'other-user', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard1->id, 'other-user', Status::CORRECT);
 
         $query = new GetQuestionsWithStatus('user-without-progress');
 
@@ -194,7 +194,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('What is 2 + 2? (Basic math)', '4 (four)');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -211,7 +211,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('Test Question', 'Test Answer');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT);
 
         $query = new GetQuestionsWithStatus('user-123');
 

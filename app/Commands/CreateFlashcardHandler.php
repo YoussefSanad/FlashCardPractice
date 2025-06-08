@@ -26,7 +26,7 @@ class CreateFlashcardHandler
         $this->practiceStatuses->create(
             $flashcard->id,
             $command->userId,
-            Status::NOT_ANSWERED->value
+            Status::NOT_ANSWERED
         );
 
         return $flashcard;

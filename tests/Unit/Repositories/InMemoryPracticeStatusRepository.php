@@ -11,12 +11,12 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
     private array $progressRecords = [];
     private int $nextId = 1;
 
-    public function create(int $flashcardId, string $userId, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
+    public function create(int $flashcardId, string $userId, Status $status, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
     {
         $progress = new PracticeStatus([
             'flashcard_id' => $flashcardId,
             'user_id' => $userId,
-            'status' => $status,
+            'status' => $status->value,
             'last_attempted_at' => $lastAttemptedAt,
         ]);
 
@@ -67,9 +67,9 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
         return $updated;
     }
 
-    public function updateStatus(PracticeStatus $practiceStatus, string $newStatus, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
+    public function updateStatus(PracticeStatus $practiceStatus, Status $newStatus, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
     {
-        $practiceStatus->status = $newStatus;
+        $practiceStatus->status = $newStatus->value;
         $practiceStatus->last_attempted_at = $lastAttemptedAt;
 
         return $practiceStatus;
