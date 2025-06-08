@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Run Composer commands in the Laravel Docker container
+if command -v docker-compose &> /dev/null; then
+    docker-compose exec app composer "$@"
+elif docker compose version &> /dev/null; then
+    docker compose exec app composer "$@"
+else
+    echo "Error: Docker Compose is not available. Please install Docker Desktop or docker-compose."
+    exit 1
+fi 
