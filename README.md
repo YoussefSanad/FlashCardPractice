@@ -70,9 +70,6 @@ cp .env.docker .env
 ./docker/scripts/artisan flashcard:interactive
 ```
 
-The application will be available at `http://localhost:8080`
-
-> **Note**: If you encounter a "Docker Compose not found" error, please install [Docker Desktop](https://www.docker.com/products/docker-desktop/) which includes Docker Compose.
 
 ### Local Development
 
