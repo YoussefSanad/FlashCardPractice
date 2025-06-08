@@ -23,19 +23,22 @@ class TransactionMiddlewareTest extends TestCase
             'transaction-user'
         );
 
-        // Track if we're in a transaction during execution
-        $wasInTransaction = false;
+        // Get the baseline transaction level (RefreshDatabase may create a base transaction)
+        $baseTransactionLevel = DB::transactionLevel();
         
-        // Use a database event to check if we're in a transaction
-        DB::listen(function () use (&$wasInTransaction) {
-            $wasInTransaction = DB::transactionLevel() > 0;
+        // Track the transaction level during command execution
+        $commandTransactionLevel = 0;
+        
+        DB::listen(function () use (&$commandTransactionLevel) {
+            $commandTransactionLevel = DB::transactionLevel();
         });
 
         // Act
         $result = $commandBus->handle($command);
 
-        // Assert
-        $this->assertTrue($wasInTransaction, 'Command should have been executed within a database transaction');
+        // Assert - Command should add an additional transaction layer beyond the base level
+        $this->assertGreaterThan($baseTransactionLevel, $commandTransactionLevel, 
+            'Command should have been executed within an additional database transaction');
         $this->assertNotNull($result);
         $this->assertEquals('Transaction Test Question', $result->question);
     }
@@ -54,18 +57,22 @@ class TransactionMiddlewareTest extends TestCase
         // Now test the query
         $query = new GetAllFlashcards('query-user');
         
-        // Track if we're in a transaction during query execution
-        $wasInTransaction = false;
+        // Get the baseline transaction level (RefreshDatabase may create a base transaction)
+        $baseTransactionLevel = DB::transactionLevel();
         
-        DB::listen(function () use (&$wasInTransaction) {
-            $wasInTransaction = DB::transactionLevel() > 0;
+        // Track the transaction level during query execution
+        $queryTransactionLevel = 0;
+        
+        DB::listen(function () use (&$queryTransactionLevel) {
+            $queryTransactionLevel = DB::transactionLevel();
         });
 
         // Act
         $result = $commandBus->handle($query);
 
-        // Assert
-        $this->assertFalse($wasInTransaction, 'Query should NOT have been executed within a database transaction');
+        // Assert - Query should not add additional transaction layers beyond the base level
+        $this->assertEquals($baseTransactionLevel, $queryTransactionLevel, 
+            'Query should NOT have been executed within an additional database transaction');
         $this->assertNotEmpty($result);
         $this->assertEquals(1, $result->count());
     }
