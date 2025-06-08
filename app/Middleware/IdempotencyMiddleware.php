@@ -28,7 +28,7 @@ class IdempotencyMiddleware implements Middleware
 
         // Execute the command and cache the result
         $result = $next($command);
-        
+
         // Cache the result for future idempotency checks
         Cache::put($cacheKey, $this->serializeResult($result), self::CACHE_TTL);
 
@@ -42,7 +42,6 @@ class IdempotencyMiddleware implements Middleware
         $writeCommands = [
             'App\Commands\CreateFlashcard',
             'App\Commands\SubmitAnswer',
-            'App\Commands\ResetProgress',
         ];
 
         return in_array(get_class($command), $writeCommands);
@@ -53,7 +52,7 @@ class IdempotencyMiddleware implements Middleware
         // Create a deterministic hash based on command class and data
         $commandClass = get_class($command);
         $commandData = $this->extractCommandData($command);
-        
+
         // Create a hash that uniquely identifies this command execution
         $dataString = serialize([$commandClass, $commandData]);
         return hash('sha256', $dataString);
@@ -62,17 +61,17 @@ class IdempotencyMiddleware implements Middleware
     private function extractCommandData($command): array
     {
         $data = [];
-        
+
         // Use reflection to get all public properties
         $reflection = new \ReflectionClass($command);
         $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
-        
+
         foreach ($properties as $property) {
             $propertyName = $property->getName();
-            
+
             try {
                 $value = $property->getValue($command);
-                
+
                 // For idempotency, we need exact values
                 $data[$propertyName] = $value;
             } catch (\Exception $e) {
@@ -80,10 +79,10 @@ class IdempotencyMiddleware implements Middleware
                 $data[$propertyName] = '[UNREADABLE]';
             }
         }
-        
+
         // Sort to ensure consistent hashing regardless of property order
         ksort($data);
-        
+
         return $data;
     }
 
@@ -109,29 +108,29 @@ class IdempotencyMiddleware implements Middleware
     {
         $className = $cachedData['type'];
         $data = $cachedData['data'];
-        
+
         // Handle primitive types (arrays, strings, numbers, etc.)
         if ($className === 'primitive') {
             return $data;
         }
-        
+
         // For Eloquent models, we can recreate the instance
         if (is_subclass_of($className, \Illuminate\Database\Eloquent\Model::class)) {
             $model = new $className();
-            
+
             // Set the attributes and mark as existing (not new)
             $model->setRawAttributes($data);
             $model->exists = true;
             $model->syncOriginal();
-            
+
             return $model;
         }
-        
+
         // For other objects, try to create an instance with the data
         try {
             $reflection = new \ReflectionClass($className);
             $instance = $reflection->newInstanceWithoutConstructor();
-            
+
             foreach ($data as $property => $value) {
                 if ($reflection->hasProperty($property)) {
                     $prop = $reflection->getProperty($property);
@@ -139,7 +138,7 @@ class IdempotencyMiddleware implements Middleware
                     $prop->setValue($instance, $value);
                 }
             }
-            
+
             return $instance;
         } catch (\Exception $e) {
             // If deserialization fails, return the raw data
@@ -154,12 +153,12 @@ class IdempotencyMiddleware implements Middleware
             if ($result instanceof \Illuminate\Database\Eloquent\Model) {
                 return $result->getAttributes();
             }
-            
+
             // For other objects, try to extract public properties
             $data = [];
             $reflection = new \ReflectionClass($result);
             $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
-            
+
             foreach ($properties as $property) {
                 try {
                     $data[$property->getName()] = $property->getValue($result);
@@ -167,11 +166,11 @@ class IdempotencyMiddleware implements Middleware
                     // Skip unreadable properties
                 }
             }
-            
+
             return $data;
         }
-        
+
         // For non-objects, return as-is
         return ['value' => $result];
     }
-} 
+}
