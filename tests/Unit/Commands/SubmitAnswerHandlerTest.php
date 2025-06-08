@@ -4,12 +4,12 @@ namespace Tests\Unit\Commands;
 
 use App\Commands\SubmitAnswer;
 use App\Commands\SubmitAnswerHandler;
+use App\Enums\Status;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
 use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
 use App\Models\PracticeAttempt;
-use App\Models\PracticeStatus;
 use DateTimeImmutable;
 use Tests\TestCase;
 use Tests\Unit\Repositories\InMemoryFlashcardRepository;
@@ -70,7 +70,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
         $this->assertEquals('user-123', $progress->user_id);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
+        $this->assertEquals(Status::CORRECT->value, $progress->status);
         $this->assertNotNull($progress->last_attempted_at);
     }
 
@@ -102,7 +102,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
         $this->assertEquals('user-123', $progress->user_id);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $progress->status);
+        $this->assertEquals(Status::INCORRECT->value, $progress->status);
     }
 
     public function test_case_insensitive_answer_comparison(): void
@@ -141,7 +141,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $flashcard = $this->flashcards->create('What is 2+2?', '4');
 
         // Create initial progress (incorrect)
-        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::INCORRECT->value);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -155,7 +155,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(1, $progressRecords);
         $progress = $progressRecords[0];
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
+        $this->assertEquals(Status::CORRECT->value, $progress->status);
         $this->assertNotNull($progress->last_attempted_at);
     }
 
@@ -163,7 +163,7 @@ class SubmitAnswerHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('What is 2+2?', '4');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
 
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
@@ -252,8 +252,8 @@ class SubmitAnswerHandlerTest extends TestCase
         $progress1 = $this->practiceStatuses->findBy($flashcard->id, 'user-1');
         $progress2 = $this->practiceStatuses->findBy($flashcard->id, 'user-2');
 
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress1->status);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $progress2->status);
+        $this->assertEquals(Status::CORRECT->value, $progress1->status);
+        $this->assertEquals(Status::INCORRECT->value, $progress2->status);
 
         // Verify separate practice attempts
         $attempts = $this->practiceAttempts->getAll();
@@ -280,7 +280,7 @@ class SubmitAnswerHandlerTest extends TestCase
 
         // Verify final progress is correct
         $progress = $this->practiceStatuses->findBy($flashcard->id, 'user-123');
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
+        $this->assertEquals(Status::CORRECT->value, $progress->status);
 
         // Verify both attempts were recorded
         $attempts = $this->practiceAttempts->getAll();
@@ -321,6 +321,6 @@ class SubmitAnswerHandlerTest extends TestCase
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
         $this->assertEquals('user-123', $progress->user_id);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
+        $this->assertEquals(Status::CORRECT->value, $progress->status);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\ValueObjects;
 
-use App\Models\PracticeStatus;
+use App\Enums\Status;
 
 class QuestionWithStatus
 {
@@ -15,11 +15,6 @@ class QuestionWithStatus
 
     public function status(): string
     {
-        return match ($this->status) {
-            PracticeStatus::STATUS_NOT_ANSWERED => 'Not answered',
-            PracticeStatus::STATUS_CORRECT => 'Correct',
-            PracticeStatus::STATUS_INCORRECT => 'Incorrect',
-            default => 'Unknown',
-        };
+        return Status::from($this->status)->label();
     }
 }

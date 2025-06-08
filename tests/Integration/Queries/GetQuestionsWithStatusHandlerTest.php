@@ -4,6 +4,7 @@ namespace Integration\Queries;
 
 use App\Commands\CreateFlashcard;
 use App\Commands\SubmitAnswer;
+use App\Enums\Status;
 use App\Queries\GetQuestionsWithStatus;
 use App\Models\PracticeStatus;
 use App\ValueObjects\QuestionWithStatus;
@@ -53,18 +54,18 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(2, $result);
-        
+
         $this->assertInstanceOf(QuestionWithStatus::class, $result[0]);
         $this->assertEquals($flashcard1->id, $result[0]->flashcardId);
         $this->assertEquals('user-123', $result[0]->userId);
         $this->assertEquals('What is PHP?', $result[0]->question);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $result[0]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $result[0]->status);
 
         $this->assertInstanceOf(QuestionWithStatus::class, $result[1]);
         $this->assertEquals($flashcard2->id, $result[1]->flashcardId);
         $this->assertEquals('user-123', $result[1]->userId);
         $this->assertEquals('What is Laravel?', $result[1]->question);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $result[1]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $result[1]->status);
 
         // Verify database state
         $this->assertDatabaseCount('flashcards', 2);
@@ -88,13 +89,13 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(2, $result);
-        
+
         // Find questions by their flashcard IDs
         $question1 = collect($result)->firstWhere('flashcardId', $flashcard1->id);
         $question2 = collect($result)->firstWhere('flashcardId', $flashcard2->id);
 
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $question1->status);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $question2->status);
+        $this->assertEquals(Status::CORRECT->value, $question1->status);
+        $this->assertEquals(Status::INCORRECT->value, $question2->status);
 
         // Verify database state
         $this->assertDatabaseCount('practice_statuses', 2);
@@ -117,9 +118,9 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(2, $result);
-        
+
         foreach ($result as $question) {
-            $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $question->status);
+            $this->assertEquals(Status::NOT_ANSWERED->value, $question->status);
             $this->assertEquals('user-without-progress', $question->userId);
         }
     }
@@ -150,7 +151,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         $this->assertEquals($multilineQuestion, $question->question);
         $this->assertEquals($flashcard->id, $question->flashcardId);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $question->status);
+        $this->assertEquals(Status::CORRECT->value, $question->status);
     }
 
     public function test_gets_questions_with_latest_status(): void
@@ -171,10 +172,10 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         // Assert - Should show the latest status (correct)
         $this->assertCount(1, $result);
         $question = $result[0];
-        
+
         $this->assertEquals($flashcard->id, $question->flashcardId);
         $this->assertEquals('Difficult Question', $question->question);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $question->status);
+        $this->assertEquals(Status::CORRECT->value, $question->status);
 
         // Verify database state
         $this->assertDatabaseCount('practice_attempts', 3);
@@ -202,13 +203,13 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $this->assertEquals($flashcard->id, $user1Question->flashcardId);
         $this->assertEquals('user-1', $user1Question->userId);
         $this->assertEquals('What is PHP?', $user1Question->question);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $user1Question->status);
+        $this->assertEquals(Status::CORRECT->value, $user1Question->status);
 
         // User 2 should have not answered status
         $user2Question = $questionsUser2[0];
         $this->assertEquals($flashcard->id, $user2Question->flashcardId);
         $this->assertEquals('user-2', $user2Question->userId);
         $this->assertEquals('What is PHP?', $user2Question->question);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $user2Question->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $user2Question->status);
     }
-} 
+}

@@ -4,6 +4,7 @@ namespace Integration\Commands;
 
 use App\Commands\CreateFlashcard;
 use App\Commands\SubmitAnswer;
+use App\Enums\Status;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
@@ -50,7 +51,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
     }
 
@@ -77,7 +78,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_INCORRECT,
+            'status' => Status::INCORRECT->value,
         ]);
     }
 
@@ -131,7 +132,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
 
         // Should only have one status record
@@ -142,7 +143,7 @@ class SubmitAnswerHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
-        
+
         // Create correct status by submitting correct answer first
         $this->commandBus->handle(new SubmitAnswer($flashcard->id, '4', 'user-123'));
 
@@ -207,13 +208,13 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-1',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-2',
-            'status' => PracticeStatus::STATUS_INCORRECT,
+            'status' => Status::INCORRECT->value,
         ]);
 
         // Verify separate practice attempts
@@ -242,7 +243,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
 
         // Verify both attempts were recorded

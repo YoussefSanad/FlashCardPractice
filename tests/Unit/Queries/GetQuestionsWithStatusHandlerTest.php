@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Queries;
 
+use App\Enums\Status;
 use App\Queries\GetQuestionsWithStatus;
 use App\Queries\GetQuestionsWithStatusHandler;
 use App\Models\PracticeStatus;
@@ -23,7 +24,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $this->flashcards = new InMemoryFlashcardRepository();
         $this->practiceStatuses = new InMemoryPracticeStatusRepository();
         $this->flashcards->setPracticeStatusRepository($this->practiceStatuses);
-        
+
         $this->handler = new GetQuestionsWithStatusHandler(
             $this->flashcards
         );
@@ -52,18 +53,18 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(2, $questions);
-        
+
         $this->assertInstanceOf(QuestionWithStatus::class, $questions[0]);
         $this->assertEquals($flashcard1->id, $questions[0]->flashcardId);
         $this->assertEquals('user-123', $questions[0]->userId);
         $this->assertEquals('What is PHP?', $questions[0]->question);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $questions[0]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $questions[0]->status);
 
         $this->assertInstanceOf(QuestionWithStatus::class, $questions[1]);
         $this->assertEquals($flashcard2->id, $questions[1]->flashcardId);
         $this->assertEquals('user-123', $questions[1]->userId);
         $this->assertEquals('What is Laravel?', $questions[1]->question);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $questions[1]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $questions[1]->status);
     }
 
     public function test_returns_questions_with_correct_status(): void
@@ -73,8 +74,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('What is Laravel?', 'A PHP framework');
 
         // Create practice statuses
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT->value);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -83,9 +84,9 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(2, $questions);
-        
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $questions[0]->status);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $questions[1]->status);
+
+        $this->assertEquals(Status::CORRECT->value, $questions[0]->status);
+        $this->assertEquals(Status::INCORRECT->value, $questions[1]->status);
     }
 
     public function test_returns_questions_with_mixed_statuses(): void
@@ -96,8 +97,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard3 = $this->flashcards->create('Question 3', 'Answer 3');
 
         // Create mixed practice statuses
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT->value);
         // flashcard3 has no practice status (should default to NOT_ANSWERED)
 
         $query = new GetQuestionsWithStatus('user-123');
@@ -107,9 +108,9 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(3, $questions);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $questions[0]->status);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $questions[1]->status);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $questions[2]->status);
+        $this->assertEquals(Status::CORRECT->value, $questions[0]->status);
+        $this->assertEquals(Status::INCORRECT->value, $questions[1]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $questions[2]->status);
     }
 
     public function test_isolates_questions_by_user_id(): void
@@ -119,11 +120,11 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Create practice statuses for different users
-        $this->practiceStatuses->create($flashcard1->id, 'user-1', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-1', PracticeStatus::STATUS_CORRECT);
-        
-        $this->practiceStatuses->create($flashcard1->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-1', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-1', Status::CORRECT->value);
+
+        $this->practiceStatuses->create($flashcard1->id, 'user-2', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-2', Status::INCORRECT->value);
 
         // Act
         $questionsUser1 = $this->handler->handle(new GetQuestionsWithStatus('user-1'));
@@ -134,14 +135,14 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $this->assertCount(2, $questionsUser2);
 
         // User 1 should have correct statuses
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $questionsUser1[0]->status);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $questionsUser1[1]->status);
+        $this->assertEquals(Status::CORRECT->value, $questionsUser1[0]->status);
+        $this->assertEquals(Status::CORRECT->value, $questionsUser1[1]->status);
         $this->assertEquals('user-1', $questionsUser1[0]->userId);
         $this->assertEquals('user-1', $questionsUser1[1]->userId);
 
         // User 2 should have incorrect statuses
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $questionsUser2[0]->status);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $questionsUser2[1]->status);
+        $this->assertEquals(Status::INCORRECT->value, $questionsUser2[0]->status);
+        $this->assertEquals(Status::INCORRECT->value, $questionsUser2[1]->status);
         $this->assertEquals('user-2', $questionsUser2[0]->userId);
         $this->assertEquals('user-2', $questionsUser2[1]->userId);
     }
@@ -150,7 +151,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('What is 2+2?', '4');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -164,7 +165,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $this->assertEquals($flashcard->id, $question->flashcardId);
         $this->assertEquals('user-123', $question->userId);
         $this->assertEquals('What is 2+2?', $question->question);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $question->status);
+        $this->assertEquals(Status::CORRECT->value, $question->status);
     }
 
     public function test_handles_user_with_no_practice_statuses(): void
@@ -174,7 +175,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // Create practice statuses for different user only
-        $this->practiceStatuses->create($flashcard1->id, 'other-user', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'other-user', Status::CORRECT->value);
 
         $query = new GetQuestionsWithStatus('user-without-progress');
 
@@ -183,8 +184,8 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Assert
         $this->assertCount(2, $questions);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $questions[0]->status);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $questions[1]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $questions[0]->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $questions[1]->status);
         $this->assertEquals('user-without-progress', $questions[0]->userId);
         $this->assertEquals('user-without-progress', $questions[1]->userId);
     }
@@ -193,7 +194,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
     {
         // Arrange
         $flashcard = $this->flashcards->create('What is 2 + 2? (Basic math)', '4 (four)');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -203,14 +204,14 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         // Assert
         $this->assertCount(1, $questions);
         $this->assertEquals('What is 2 + 2? (Basic math)', $questions[0]->question);
-        $this->assertEquals(PracticeStatus::STATUS_CORRECT, $questions[0]->status);
+        $this->assertEquals(Status::CORRECT->value, $questions[0]->status);
     }
 
     public function test_question_with_status_status_method(): void
     {
         // Arrange
         $flashcard = $this->flashcards->create('Test Question', 'Test Answer');
-        $this->practiceStatuses->create($flashcard->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'user-123', Status::CORRECT->value);
 
         $query = new GetQuestionsWithStatus('user-123');
 
@@ -221,4 +222,4 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
         $question = $questions[0];
         $this->assertEquals('Correct', $question->status());
     }
-} 
+}

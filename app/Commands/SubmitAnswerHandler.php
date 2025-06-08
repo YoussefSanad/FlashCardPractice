@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Enums\Status;
 use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
@@ -41,7 +42,7 @@ class SubmitAnswerHandler
             $isCorrect
         );
 
-        $newStatus = $isCorrect ? PracticeStatus::STATUS_CORRECT : PracticeStatus::STATUS_INCORRECT;
+        $newStatus = $isCorrect ? Status::CORRECT->value : Status::INCORRECT->value;
         if ($practiceStatus) {
             $this->practiceStatuses->updateStatus($practiceStatus, $newStatus, $this->clock->now());
         } else {
@@ -71,7 +72,7 @@ class SubmitAnswerHandler
             throw new FlashcardNotFound($flashcardId);
         }
 
-        if ($practiceStatus && $practiceStatus->status === PracticeStatus::STATUS_CORRECT) {
+        if ($practiceStatus && $practiceStatus->status === Status::CORRECT->value) {
             throw new QuestionAlreadyAnsweredCorrectly($flashcardId);
         }
     }

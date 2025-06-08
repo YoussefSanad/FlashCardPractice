@@ -5,6 +5,7 @@ namespace Integration\Commands;
 use App\Commands\CreateFlashcard;
 use App\Commands\ResetProgress;
 use App\Commands\SubmitAnswer;
+use App\Enums\Status;
 use App\Models\Flashcard;
 use App\Models\PracticeStatus;
 use App\Models\PracticeAttempt;
@@ -43,14 +44,14 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard1->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard2->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
     }
@@ -76,7 +77,7 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard1->id,
             'user_id' => 'target-user',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
@@ -84,7 +85,7 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard2->id,
             'user_id' => 'other-user',
-            'status' => PracticeStatus::STATUS_INCORRECT,
+            'status' => Status::INCORRECT->value,
         ]);
 
         $this->assertDatabaseMissing('practice_statuses', [
@@ -127,33 +128,33 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard1->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard2->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard3->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
         // Verify no incorrect or correct statuses remain
         $this->assertDatabaseMissing('practice_statuses', [
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
 
         $this->assertDatabaseMissing('practice_statuses', [
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_INCORRECT,
+            'status' => Status::INCORRECT->value,
         ]);
     }
 
@@ -176,20 +177,20 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-1',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-2',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-3',
-            'status' => PracticeStatus::STATUS_CORRECT,
+            'status' => Status::CORRECT->value,
         ]);
     }
 
@@ -211,7 +212,7 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
@@ -250,11 +251,11 @@ class ResetProgressHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $flashcard->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
 
         // Should only have one practice status record
         $this->assertDatabaseCount('practice_statuses', 1);
     }
-} 
+}

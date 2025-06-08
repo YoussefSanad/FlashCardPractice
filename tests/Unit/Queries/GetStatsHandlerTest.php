@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Queries;
 
+use App\Enums\Status;
 use App\Queries\GetStats;
 use App\Queries\GetStatsHandler;
 use App\Models\PracticeStatus;
@@ -73,9 +74,9 @@ class GetStatsHandlerTest extends TestCase
         $flashcard4 = $this->flashcards->create('Question 4', 'Answer 4');
 
         // Create practice statuses - mixed results
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
-        $this->practiceStatuses->create($flashcard3->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard3->id, 'user-123', Status::CORRECT->value);
         // flashcard4 has no attempt (STATUS_NOT_ANSWERED)
 
         $query = new GetStats('user-123');
@@ -99,8 +100,8 @@ class GetStatsHandlerTest extends TestCase
         $flashcard1 = $this->flashcards->create('Question 1', 'Answer 1');
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::CORRECT->value);
 
         $query = new GetStats('user-123');
 
@@ -123,8 +124,8 @@ class GetStatsHandlerTest extends TestCase
         $flashcard1 = $this->flashcards->create('Question 1', 'Answer 1');
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-123', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-123', Status::INCORRECT->value);
 
         $query = new GetStats('user-123');
 
@@ -148,12 +149,12 @@ class GetStatsHandlerTest extends TestCase
         $flashcard2 = $this->flashcards->create('Question 2', 'Answer 2');
 
         // User 1 has correct answers
-        $this->practiceStatuses->create($flashcard1->id, 'user-1', PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-1', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-1', Status::CORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-1', Status::CORRECT->value);
 
         // User 2 has incorrect answers
-        $this->practiceStatuses->create($flashcard1->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
-        $this->practiceStatuses->create($flashcard2->id, 'user-2', PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-2', Status::INCORRECT->value);
+        $this->practiceStatuses->create($flashcard2->id, 'user-2', Status::INCORRECT->value);
 
         // Act
         $statsUser1 = $this->handler->handle(new GetStats('user-1'));
@@ -175,7 +176,7 @@ class GetStatsHandlerTest extends TestCase
         $flashcard3 = $this->flashcards->create('Question 3', 'Answer 3');
 
         // Only one correct out of 3 total (33.3%)
-        $this->practiceStatuses->create($flashcard1->id, 'user-123', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard1->id, 'user-123', Status::CORRECT->value);
         // No attempts for flashcard2 and flashcard3
 
         $query = new GetStats('user-123');
@@ -201,7 +202,7 @@ class GetStatsHandlerTest extends TestCase
 
         // Create progress for different user
         $flashcard = $this->flashcards->getAll()[0];
-        $this->practiceStatuses->create($flashcard->id, 'other-user', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create($flashcard->id, 'other-user', Status::CORRECT->value);
 
         $query = new GetStats('user-without-progress');
 
@@ -217,4 +218,4 @@ class GetStatsHandlerTest extends TestCase
             'correct_count' => 0,
         ], $stats);
     }
-} 
+}

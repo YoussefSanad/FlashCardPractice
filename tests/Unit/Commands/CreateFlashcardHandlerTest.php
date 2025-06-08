@@ -4,6 +4,7 @@ namespace Tests\Unit\Commands;
 
 use App\Commands\CreateFlashcard;
 use App\Commands\CreateFlashcardHandler;
+use App\Enums\Status;
 use App\Models\Flashcard;
 use App\Models\PracticeStatus;
 use InvalidArgumentException;
@@ -61,7 +62,7 @@ class CreateFlashcardHandlerTest extends TestCase
         $progress = $progressRecords[0];
         $this->assertEquals($flashcard->id, $progress->flashcard_id);
         $this->assertEquals('user-456', $progress->user_id);
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $progress->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $progress->status);
     }
 
     public function test_trims_whitespace_from_question_and_answer(): void

@@ -2,8 +2,8 @@
 
 namespace App\Commands;
 
+use App\Enums\Status;
 use App\Models\Flashcard;
-use App\Models\PracticeStatus;
 use App\Repositories\FlashcardRepository;
 use App\Repositories\PracticeStatusRepository;
 use InvalidArgumentException;
@@ -26,7 +26,7 @@ class CreateFlashcardHandler
         $this->practiceStatuses->create(
             $flashcard->id,
             $command->userId,
-            PracticeStatus::STATUS_NOT_ANSWERED
+            Status::NOT_ANSWERED->value
         );
 
         return $flashcard;

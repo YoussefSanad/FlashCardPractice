@@ -3,6 +3,7 @@
 namespace Integration\Commands;
 
 use App\Commands\CreateFlashcard;
+use App\Enums\Status;
 use App\Models\Flashcard;
 use App\Models\PracticeStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,7 +52,7 @@ class CreateFlashcardHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $result->id,
             'user_id' => 'user-123',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
         ]);
     }
 
@@ -225,13 +226,13 @@ class CreateFlashcardHandlerTest extends TestCase
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $result1->id,
             'user_id' => 'user-1',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
         ]);
 
         $this->assertDatabaseHas('practice_statuses', [
             'flashcard_id' => $result2->id,
             'user_id' => 'user-2',
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
         ]);
     }
 
@@ -360,4 +361,4 @@ class CreateFlashcardHandlerTest extends TestCase
             'answer' => $multilineAnswer,
         ]);
     }
-} 
+}

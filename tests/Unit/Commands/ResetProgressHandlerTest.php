@@ -4,6 +4,7 @@ namespace Tests\Unit\Commands;
 
 use App\Commands\ResetProgress;
 use App\Commands\ResetProgressHandler;
+use App\Enums\Status;
 use App\Models\PracticeStatus;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\Repositories\InMemoryPracticeStatusRepository;
@@ -29,9 +30,9 @@ class ResetProgressHandlerTest extends TestCase
         $userId = 'user-123';
 
         // Create progress records
-        $this->practiceStatuses->create(1, $userId, PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create(2, $userId, PracticeStatus::STATUS_INCORRECT);
-        $this->practiceStatuses->create(3, 'other-user', PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create(1, $userId, Status::CORRECT->value);
+        $this->practiceStatuses->create(2, $userId, Status::INCORRECT->value);
+        $this->practiceStatuses->create(3, 'other-user', Status::CORRECT->value);
 
         $command = new ResetProgress($userId);
 
@@ -42,11 +43,11 @@ class ResetProgressHandlerTest extends TestCase
         $allProgress = $this->practiceStatuses->getAll();
         foreach ($allProgress as $progress) {
             if ($progress->user_id === $userId) {
-                $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $progress->status);
+                $this->assertEquals(Status::NOT_ANSWERED->value, $progress->status);
                 $this->assertNull($progress->last_attempted_at);
             } else {
                 // Other users' progress should remain unchanged
-                $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
+                $this->assertEquals(Status::CORRECT->value, $progress->status);
             }
         }
     }
@@ -72,8 +73,8 @@ class ResetProgressHandlerTest extends TestCase
         $otherUser = 'other-user';
 
         // Create progress records for both users
-        $this->practiceStatuses->create(1, $targetUser, PracticeStatus::STATUS_CORRECT);
-        $this->practiceStatuses->create(2, $otherUser, PracticeStatus::STATUS_INCORRECT);
+        $this->practiceStatuses->create(1, $targetUser, Status::CORRECT->value);
+        $this->practiceStatuses->create(2, $otherUser, Status::INCORRECT->value);
 
         $command = new ResetProgress($targetUser);
 
@@ -84,8 +85,8 @@ class ResetProgressHandlerTest extends TestCase
         $targetProgress = $this->practiceStatuses->findBy(1, $targetUser);
         $otherProgress = $this->practiceStatuses->findBy(2, $otherUser);
 
-        $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $targetProgress->status);
-        $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $otherProgress->status);
+        $this->assertEquals(Status::NOT_ANSWERED->value, $targetProgress->status);
+        $this->assertEquals(Status::INCORRECT->value, $otherProgress->status);
     }
 
     public function test_reset_progress_with_already_not_answered_records(): void
@@ -94,8 +95,8 @@ class ResetProgressHandlerTest extends TestCase
         $userId = 'user-123';
 
         // Create progress records - some already not_answered
-        $this->practiceStatuses->create(1, $userId, PracticeStatus::STATUS_NOT_ANSWERED);
-        $this->practiceStatuses->create(2, $userId, PracticeStatus::STATUS_CORRECT);
+        $this->practiceStatuses->create(1, $userId, Status::NOT_ANSWERED->value);
+        $this->practiceStatuses->create(2, $userId, Status::CORRECT->value);
 
         $command = new ResetProgress($userId);
 
@@ -106,7 +107,7 @@ class ResetProgressHandlerTest extends TestCase
         $allProgress = $this->practiceStatuses->getAll();
         foreach ($allProgress as $progress) {
             if ($progress->user_id === $userId) {
-                $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $progress->status);
+                $this->assertEquals(Status::NOT_ANSWERED->value, $progress->status);
                 $this->assertNull($progress->last_attempted_at);
             }
         }

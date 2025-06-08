@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\Status;
 use App\Models\Flashcard;
-use App\Models\PracticeStatus;
 use App\Repositories\FlashcardRepository;
 use App\Repositories\PracticeStatusRepository;
 use App\ValueObjects\QuestionWithStatus;
@@ -58,7 +58,7 @@ class InMemoryFlashcardRepository implements FlashcardRepository
     public function getWithStatus(string $userId): array
     {
         return array_map(function ($flashcard) use ($userId) {
-            $status = PracticeStatus::STATUS_NOT_ANSWERED;
+            $status = Status::NOT_ANSWERED->value;
 
             if ($this->practiceStatusRepository) {
                 $practiceStatus = $this->practiceStatusRepository->findBy($flashcard->id, $userId);

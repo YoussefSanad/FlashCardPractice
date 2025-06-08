@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Enums\Status;
 use App\Models\Flashcard;
-use App\Models\PracticeStatus;
 use App\ValueObjects\QuestionWithStatus;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -40,7 +40,7 @@ class EloquentFlashcardRepository implements FlashcardRepository
 
         return $flashcards->map(function ($flashcard) use ($userId) {
             $practiceStatus = $flashcard->practiceStatuses->first();
-            $status = $practiceStatus ? $practiceStatus->status : PracticeStatus::STATUS_NOT_ANSWERED;
+            $status = $practiceStatus ? $practiceStatus->status : Status::NOT_ANSWERED->value;
 
             return new QuestionWithStatus(
                 flashcardId: $flashcard->id,
@@ -55,7 +55,7 @@ class EloquentFlashcardRepository implements FlashcardRepository
     {
         return Flashcard::whereDoesntHave('practiceStatuses', function ($query) use ($userId) {
             $query->where('user_id', $userId)
-                  ->where('status', PracticeStatus::STATUS_CORRECT);
+                  ->where('status', Status::CORRECT->value);
         })->get();
     }
 }

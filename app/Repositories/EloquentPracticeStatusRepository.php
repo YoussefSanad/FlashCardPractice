@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Enums\Status;
 use App\Models\PracticeStatus;
 
 class EloquentPracticeStatusRepository implements PracticeStatusRepository
@@ -19,14 +20,14 @@ class EloquentPracticeStatusRepository implements PracticeStatusRepository
     public function countAttemptedFor(string $userId): int
     {
         return PracticeStatus::where('user_id', $userId)
-            ->where('status', '!=', PracticeStatus::STATUS_NOT_ANSWERED)
+            ->where('status', '!=', Status::NOT_ANSWERED->value)
             ->count();
     }
 
     public function resetFor(string $userId): int
     {
         return PracticeStatus::where('user_id', $userId)->update([
-            'status' => PracticeStatus::STATUS_NOT_ANSWERED,
+            'status' => Status::NOT_ANSWERED->value,
             'last_attempted_at' => null,
         ]);
     }
@@ -51,7 +52,7 @@ class EloquentPracticeStatusRepository implements PracticeStatusRepository
     public function countCorrectAttempts(string $userId): int
     {
         return PracticeStatus::where('user_id', $userId)
-            ->where('status', PracticeStatus::STATUS_CORRECT)
+            ->where('status', Status::CORRECT->value)
             ->count();
     }
 }

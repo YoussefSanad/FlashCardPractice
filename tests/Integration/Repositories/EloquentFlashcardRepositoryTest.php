@@ -2,6 +2,7 @@
 
 namespace Integration\Repositories;
 
+use App\Enums\Status;
 use App\Models\Flashcard;
 use App\Models\PracticeStatus;
 use App\Repositories\EloquentFlashcardRepository;
@@ -113,13 +114,13 @@ class EloquentFlashcardRepositoryTest extends TestCase
         $this->progressRepository->create(
             $flashcard1->id,
             $userId,
-            PracticeStatus::STATUS_CORRECT
+            Status::CORRECT->value
         );
 
         $this->progressRepository->create(
             $flashcard2->id,
             $userId,
-            PracticeStatus::STATUS_INCORRECT
+            Status::INCORRECT->value
         );
 
         // Get practicable flashcards (should exclude flashcard1 since it's correct)

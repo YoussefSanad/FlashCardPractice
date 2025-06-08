@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Enums\Status;
 use App\Models\PracticeStatus;
 use App\Repositories\PracticeStatusRepository;
 
@@ -46,7 +47,7 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
     {
         $count = 0;
         foreach ($this->progressRecords as $progress) {
-            if ($progress->user_id === $userId && $progress->status !== PracticeStatus::STATUS_NOT_ANSWERED) {
+            if ($progress->user_id === $userId && $progress->status !== Status::NOT_ANSWERED->value) {
                 $count++;
             }
         }
@@ -58,7 +59,7 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
         $updated = 0;
         foreach ($this->progressRecords as $progress) {
             if ($progress->user_id === $userId) {
-                $progress->status = PracticeStatus::STATUS_NOT_ANSWERED;
+                $progress->status = Status::NOT_ANSWERED->value;
                 $progress->last_attempted_at = null;
                 $updated++;
             }
@@ -78,7 +79,7 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
     {
         $count = 0;
         foreach ($this->progressRecords as $progress) {
-            if ($progress->user_id === $userId && $progress->status === PracticeStatus::STATUS_CORRECT) {
+            if ($progress->user_id === $userId && $progress->status === Status::CORRECT->value) {
                 $count++;
             }
         }

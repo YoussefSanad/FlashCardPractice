@@ -10,10 +10,6 @@ class PracticeStatus extends Model
 {
     use HasFactory;
 
-    public const STATUS_NOT_ANSWERED = 'not_answered';
-    public const STATUS_CORRECT = 'correct';
-    public const STATUS_INCORRECT = 'incorrect';
-
     protected $fillable = [
         'flashcard_id',
         'user_id',
