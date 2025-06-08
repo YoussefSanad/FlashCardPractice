@@ -23,7 +23,7 @@ This project is pre-configured for Docker development with a complete containeri
 
 ```bash
 # 1. Clone the repository
-git clone <repository-url>
+git clone https://github.com/YoussefSanad/FlashCardPractice.git
 cd FlashCardPractice
 
 # 2. Run the automated setup script
