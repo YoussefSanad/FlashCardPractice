@@ -4,45 +4,45 @@ A comprehensive flashcard practice application built with Laravel using CQRS (Co
 
 ## Features
 
-- 🎯 **Interactive CLI Interface** - User-friendly command-line experience
-- 📚 **Flashcard Management** - Create and manage flashcards with questions and answers
-- 🏃 **Practice Mode** - Interactive practice sessions with immediate feedback
-- 📊 **Progress Tracking** - Track individual attempts and current status per question
-- 📈 **Statistics** - Comprehensive practice statistics and completion tracking
-- 🔄 **Reset Functionality** - Clear progress while preserving flashcards
-- 🏗️ **CQRS Architecture** - Clean separation of commands and queries
-- ✅ **Comprehensive Testing** - Full unit test coverage for business logic
+- **Interactive CLI Interface** - User-friendly command-line experience
+- **Flashcard Management** - Create and manage flashcards with questions and answers
+- **Practice Mode** - Interactive practice sessions with immediate feedback
+- **Progress Tracking** - Track individual attempts and current status per question
+- **Statistics** - Comprehensive practice statistics and completion tracking
+- **Reset Functionality** - Clear progress while preserving flashcards
+- **CQRS Architecture** - Clean separation of commands and queries
+- **Comprehensive Testing** - Full unit test coverage for business logic
 
-## 🚀 Quick Start
+## Quick Start
 
-### 🐳 Docker Setup (Recommended) - Ready to Go!
+### Docker Setup (Recommended)
 
-This project is **pre-configured** for Docker! Just clone and run:
+This project is pre-configured for Docker development with a complete containerized environment.
 
-#### ⚡ One-Command Setup (Easiest)
+#### Automated Setup
 
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
 cd FlashCardPractice
 
-# 2. Run the automated setup script (does everything for you!)
+# 2. Run the automated setup script
 ./docker/scripts/setup
 
 # 3. Start the flashcard application
 ./docker/scripts/artisan flashcard:interactive
 ```
 
-**That's it!** 🎉 The setup script handles everything automatically:
-- ✅ Checks Docker installation
-- ✅ Detects port conflicts
-- ✅ Copies environment configuration
-- ✅ Builds and starts containers
-- ✅ Installs PHP dependencies
-- ✅ Runs database migrations
-- ✅ Verifies setup with tests
+The setup script handles all configuration automatically:
+- Checks Docker installation
+- Detects port conflicts
+- Copies environment configuration
+- Builds and starts containers
+- Installs PHP dependencies
+- Runs database migrations
+- Verifies setup with tests
 
-#### 🛠️ Manual Setup (Step-by-step)
+#### Manual Setup
 
 If you prefer to run each step manually:
 
@@ -57,7 +57,7 @@ cp .env.docker .env
 # 3. Build and start Docker containers (Docker Desktop must be running)
 ./docker/scripts/docker-up
 
-# 4. Install PHP dependencies (IMPORTANT: Run this first!)
+# 4. Install PHP dependencies
 ./docker/scripts/composer install
 
 # 5. Run database migrations
@@ -70,11 +70,11 @@ cp .env.docker .env
 ./docker/scripts/artisan flashcard:interactive
 ```
 
-**That's it!** 🎉 The application will be available at `http://localhost:8080`
+The application will be available at `http://localhost:8080`
 
-> **Note**: If you get a "Docker Compose not found" error, please install [Docker Desktop](https://www.docker.com/products/docker-desktop/) which includes Docker Compose.
+> **Note**: If you encounter a "Docker Compose not found" error, please install [Docker Desktop](https://www.docker.com/products/docker-desktop/) which includes Docker Compose.
 
-### 💻 Local Development (Alternative)
+### Local Development
 
 If you prefer to run without Docker:
 
@@ -104,13 +104,13 @@ php artisan migrate
 php artisan flashcard:interactive
 ```
 
-## 📋 Requirements
+## Requirements
 
-### 🐳 Docker Development (Recommended & Pre-configured)
+### Docker Development (Recommended)
 - **Docker Desktop** - Download from [docker.com](https://www.docker.com/products/docker-desktop/)
 - **Git** - For cloning the repository
 
-### 💻 Local Development (Alternative)
+### Local Development
 - **PHP 8.1+** with extensions: PDO, MySQL, SQLite
 - **Composer** - PHP dependency manager
 - **Laravel 10.x** (included in dependencies)
@@ -156,32 +156,32 @@ The application uses the following key dependencies:
 - **Laravel Framework** - Core application framework
 - **PHPUnit** - Testing framework
 
-## 🐳 Docker Development Setup
+## Docker Development Setup
 
-### ✅ Pre-configured Setup
+### Pre-configured Setup
 
-**This project is ready for Docker out of the box!** Clean vanilla Docker setup without Laravel Sail.
+This project includes a complete Docker development environment with Laravel, Nginx, MySQL, and Redis.
 
 **What's included:**
-- ✅ `docker-compose.yml` - Laravel app + Nginx + MySQL + Redis
-- ✅ `Dockerfile` - Custom PHP 8.4-FPM container
-- ✅ `docker/nginx/nginx.conf` - Nginx configuration for Laravel
-- ✅ `docker/scripts/` - Helper scripts for common tasks
-- ✅ `.env.docker` - Pre-configured environment for Docker
+- `docker-compose.yml` - Laravel app + Nginx + MySQL + Redis
+- `Dockerfile` - Custom PHP 8.4-FPM container
+- `docker/nginx/nginx.conf` - Nginx configuration for Laravel
+- `docker/scripts/` - Helper scripts for common tasks
+- `.env.docker` - Pre-configured environment for Docker
 
-### 🚀 Getting Started
+### Getting Started
 
 ```bash
 # Make sure Docker Desktop is running, then:
 cp .env.docker .env
 ./docker/scripts/docker-up
-./docker/scripts/composer install  # IMPORTANT: Install dependencies first!
+./docker/scripts/composer install
 ./docker/scripts/migrate
-./docker/scripts/artisan test      # Verify everything is working
+./docker/scripts/artisan test
 ./docker/scripts/artisan flashcard:interactive
 ```
 
-### 🛠️ Docker Helper Scripts
+### Docker Helper Scripts
 
 The project includes convenient helper scripts in `docker/scripts/`:
 
@@ -208,7 +208,7 @@ The project includes convenient helper scripts in `docker/scripts/`:
 ./docker/scripts/check-ports
 ```
 
-### 🐳 Docker Services
+### Docker Services
 
 The setup includes the following services:
 
@@ -219,9 +219,9 @@ The setup includes the following services:
 
 *External ports are mapped to non-standard ports to avoid conflicts with local services
 
-### ⚙️ Environment Configuration
+### Environment Configuration
 
-✅ **Copy `.env.docker` to `.env`** for Docker-ready configuration:
+Copy `.env.docker` to `.env` for Docker-ready configuration:
 
 ```env
 # Application
@@ -239,74 +239,10 @@ SESSION_DRIVER=redis
 REDIS_HOST=redis           # Docker service name
 ```
 
-### 🔧 Common Docker Commands
-
-```bash
-# Build and start all services
-./docker/scripts/docker-up
-
-# View logs
-docker-compose logs -f  # or: docker compose logs -f
-
-# Stop all services
-./docker/scripts/docker-down
-
-# Rebuild a specific service
-docker-compose build app  # or: docker compose build app
-
-# Access container shell
-docker-compose exec app bash  # or: docker compose exec app bash
-
-# View running containers
-docker-compose ps  # or: docker compose ps
-```
 
 > **Note**: The helper scripts automatically detect whether to use `docker-compose` or `docker compose` based on your installation.
 
-### 🐛 Troubleshooting
 
-#### Port Conflicts
-If you get "port already in use" errors:
-
-```bash
-# Check what's using the ports
-./docker/scripts/check-ports
-
-# Stop local MySQL/Redis if running
-brew services stop mysql
-brew services stop redis
-
-# Or manually check specific ports
-lsof -i :3306
-lsof -i :6379
-```
-
-#### Common Issues
-- **"Failed to open stream: No such file or directory" (vendor/autoload.php)**: 
-  Run `./docker/scripts/composer install` to install PHP dependencies first
-- **MySQL port 3306 in use**: Our setup uses port 3307 externally to avoid conflicts
-- **Redis port 6379 in use**: Our setup uses port 6380 externally to avoid conflicts
-- **Permission errors**: Make sure Docker Desktop is running
-- **Build failures**: Try `docker system prune` to clean up Docker cache
-
-## Usage
-
-### Interactive CLI Application
-
-Start the interactive application:
-
-```bash
-php artisan flashcard:interactive
-```
-
-### Available Menu Options
-
-1. **Create a flashcard** - Add new questions and answers
-2. **List all flashcards** - View all existing flashcards
-3. **Practice** - Interactive practice sessions
-4. **Stats** - View practice statistics
-5. **Reset** - Clear all practice progress
-6. **Exit** - Close the application
 
 ## Architecture
 
@@ -321,7 +257,7 @@ The application implements CQRS (Command Query Responsibility Segregation) using
 
 #### Queries (Read Operations)
 - `GetAllFlashcardsQuery` - Retrieves all flashcards
-- `GetQuestionsWithStatus` - Gets all quesitons with status
+- `GetQuestionsWithStatus` - Gets all questions with status
 - `GetStatsQuery` - Calculates practice statistics
 - `GetPracticeableQuestionsQuery` - Gets questions available for practice
 
@@ -428,9 +364,9 @@ Current progress status per question.
 - Maintain referential integrity through foreign keys
 - Atomic operations using database transactions
 
-## 🧪 Testing
+## Testing
 
-### 🐳 Running Tests with Docker
+### Running Tests with Docker
 
 ```bash
 # Run all tests
@@ -452,14 +388,14 @@ Current progress status per question.
 ./docker/scripts/artisan test --parallel
 ```
 
-### 💻 Running Tests Locally
+### Running Tests Locally
 
 ```bash
 # Run all tests
 php artisan test
 ```
 
-### 🗄️ Test Environment
+### Test Environment
 
 **Docker**: Tests use MySQL test database in the Docker container
 **Local**: Tests use SQLite in-memory database for:

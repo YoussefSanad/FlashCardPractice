@@ -68,6 +68,13 @@ echo "📦 Installing PHP dependencies..."
 ./docker/scripts/composer install
 echo "✅ PHP dependencies installed"
 
+# Generate application key if needed
+if [ "$GENERATE_KEY" = true ]; then
+    echo "🔑 Generating Laravel application key..."
+    ./docker/scripts/artisan key:generate
+    echo "✅ Application key generated"
+fi
+
 # Run migrations
 echo "🗄️  Running database migrations..."
 ./docker/scripts/migrate
