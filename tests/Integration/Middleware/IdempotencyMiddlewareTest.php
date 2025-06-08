@@ -203,17 +203,10 @@ class IdempotencyMiddlewareTest extends TestCase
      */
     private function generateExpectedKey($command): string
     {
+        // Match the simplified approach used in the middleware
         $commandClass = get_class($command);
-        $reflection = new \ReflectionClass($command);
-        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $serializedCommand = serialize($command);
 
-        $data = [];
-        foreach ($properties as $property) {
-            $data[$property->getName()] = $property->getValue($command);
-        }
-        ksort($data);
-
-        $dataString = serialize([$commandClass, $data]);
-        return hash('sha256', $dataString);
+        return hash('sha256', $commandClass . ':' . $serializedCommand);
     }
 }
