@@ -19,6 +19,33 @@ A comprehensive flashcard practice application built with Laravel using CQRS (Co
 
 This project is **pre-configured** for Docker! Just clone and run:
 
+#### ⚡ One-Command Setup (Easiest)
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd FlashCardPractice
+
+# 2. Run the automated setup script (does everything for you!)
+./docker/scripts/setup
+
+# 3. Start the flashcard application
+./docker/scripts/artisan flashcard:interactive
+```
+
+**That's it!** 🎉 The setup script handles everything automatically:
+- ✅ Checks Docker installation
+- ✅ Detects port conflicts
+- ✅ Copies environment configuration
+- ✅ Builds and starts containers
+- ✅ Installs PHP dependencies
+- ✅ Runs database migrations
+- ✅ Verifies setup with tests
+
+#### 🛠️ Manual Setup (Step-by-step)
+
+If you prefer to run each step manually:
+
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
