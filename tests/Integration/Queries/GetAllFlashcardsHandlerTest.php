@@ -145,8 +145,8 @@ class GetAllFlashcardsHandlerTest extends TestCase
         $this->assertContains($flashcard2->id, $result->pluck('id')->toArray());
         $this->assertContains($flashcard3->id, $result->pluck('id')->toArray());
 
-        // Verify practice statuses exist but don't affect the query
-        $this->assertDatabaseCount('practice_statuses', 3); // All should have status records
+        // Practice statuses are only created when users interact with flashcards
+        $this->assertDatabaseCount('practice_statuses', 2); // Only 2 created via SubmitAnswer
         $this->assertDatabaseCount('practice_attempts', 2); // Only 2 attempts made
     }
 

@@ -101,7 +101,7 @@ class FlashcardInteractiveCommand extends Command
         }
 
         try {
-            $flashcard = $this->commandBus->handle(new CreateFlashcard($question, $answer, $this->userId));
+            $flashcard = $this->commandBus->handle(new CreateFlashcard($question, $answer));
             $this->info("✅ Flashcard created successfully! (ID: {$flashcard->id})");
         } catch (InvalidArgumentException $e) {
             $this->error($e->getMessage());

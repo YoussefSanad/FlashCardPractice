@@ -29,7 +29,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             'What is Laravel?',
             'A PHP framework',
-            'user-123'
         );
 
         // Act
@@ -48,12 +47,6 @@ class CreateFlashcardHandlerTest extends TestCase
             'answer' => 'A PHP framework',
         ]);
 
-        // Verify initial practice status was created
-        $this->assertDatabaseHas('practice_statuses', [
-            'flashcard_id' => $result->id,
-            'user_id' => 'user-123',
-            'status' => Status::NOT_ANSWERED->value,
-        ]);
     }
 
     public function test_trims_whitespace_from_question_and_answer(): void
@@ -62,7 +55,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             '  What is PHP?  ',
             '  A programming language  ',
-            'user-456'
         );
 
         // Act
@@ -85,7 +77,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             '',
             'Valid Answer',
-            'user-123'
         );
 
         // Act & Assert
@@ -101,7 +92,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             '   ',
             'Valid Answer',
-            'user-123'
         );
 
         // Act & Assert
@@ -117,7 +107,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             'Valid Question',
             '',
-            'user-123'
         );
 
         // Act & Assert
@@ -133,7 +122,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             'Valid Question',
             '   ',
-            'user-123'
         );
 
         // Act & Assert
@@ -150,7 +138,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             $longQuestion,
             'Valid Answer',
-            'user-123'
         );
 
         // Act & Assert
@@ -167,7 +154,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             'Valid Question',
             $longAnswer,
-            'user-123'
         );
 
         // Act & Assert
@@ -185,7 +171,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             $maxLengthQuestion,
             $maxLengthAnswer,
-            'user-123'
         );
 
         // Act
@@ -206,8 +191,8 @@ class CreateFlashcardHandlerTest extends TestCase
     public function test_creates_separate_flashcards_for_different_users(): void
     {
         // Arrange
-        $command1 = new CreateFlashcard('Question 1', 'Answer 1', 'user-1');
-        $command2 = new CreateFlashcard('Question 2', 'Answer 2', 'user-2');
+        $command1 = new CreateFlashcard('Question 1', 'Answer 1');
+        $command2 = new CreateFlashcard('Question 2', 'Answer 2');
 
         // Act
         $result1 = $this->commandBus->handle($command1);
@@ -220,20 +205,6 @@ class CreateFlashcardHandlerTest extends TestCase
 
         // Verify separate database records
         $this->assertDatabaseCount('flashcards', 2);
-        $this->assertDatabaseCount('practice_statuses', 2);
-
-        // Verify separate practice statuses
-        $this->assertDatabaseHas('practice_statuses', [
-            'flashcard_id' => $result1->id,
-            'user_id' => 'user-1',
-            'status' => Status::NOT_ANSWERED->value,
-        ]);
-
-        $this->assertDatabaseHas('practice_statuses', [
-            'flashcard_id' => $result2->id,
-            'user_id' => 'user-2',
-            'status' => Status::NOT_ANSWERED->value,
-        ]);
     }
 
     public function test_handles_special_characters_correctly(): void
@@ -242,7 +213,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             'What is 2 + 2? (Basic math)',
             '4 (four)',
-            'user-special'
         );
 
         // Act
@@ -265,7 +235,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $command = new CreateFlashcard(
             '¿Cómo estás? (How are you in Spanish)',
             'Bien, gracias 😊',
-            'user-unicode'
         );
 
         // Act
@@ -279,36 +248,6 @@ class CreateFlashcardHandlerTest extends TestCase
         $this->assertDatabaseHas('flashcards', [
             'question' => '¿Cómo estás? (How are you in Spanish)',
             'answer' => 'Bien, gracias 😊',
-        ]);
-    }
-
-    public function test_creates_multiple_flashcards_for_same_user(): void
-    {
-        // Arrange
-        $command1 = new CreateFlashcard('What is HTML?', 'HyperText Markup Language', 'user-123');
-        $command2 = new CreateFlashcard('What is CSS?', 'Cascading Style Sheets', 'user-123');
-
-        // Act
-        $result1 = $this->commandBus->handle($command1);
-        $result2 = $this->commandBus->handle($command2);
-
-        // Assert
-        $this->assertNotEquals($result1->id, $result2->id);
-
-        // Verify both flashcards exist
-        $this->assertDatabaseCount('flashcards', 2);
-
-        // Verify both practice statuses exist for the same user
-        $this->assertDatabaseCount('practice_statuses', 2);
-
-        $this->assertDatabaseHas('practice_statuses', [
-            'flashcard_id' => $result1->id,
-            'user_id' => 'user-123',
-        ]);
-
-        $this->assertDatabaseHas('practice_statuses', [
-            'flashcard_id' => $result2->id,
-            'user_id' => 'user-123',
         ]);
     }
 

@@ -20,8 +20,7 @@ class LoggingMiddlewareTest extends TestCase
                 return $context['command'] === 'App\Commands\CreateFlashcard' &&
                        isset($context['data']) &&
                        $context['data']['question'] === 'Test Question' &&
-                       $context['data']['answer'] === 'Test Answer' &&
-                       $context['data']['userId'] === 'user-123';
+                       $context['data']['answer'] === 'Test Answer';
             }));
 
         Log::shouldReceive('info')
@@ -38,7 +37,6 @@ class LoggingMiddlewareTest extends TestCase
         $command = new CreateFlashcard(
             'Test Question',
             'Test Answer',
-            'user-123'
         );
 
         $result = $commandBus->handle($command);
@@ -72,7 +70,6 @@ class LoggingMiddlewareTest extends TestCase
         $command = new CreateFlashcard(
             '', // Empty question will cause validation failure
             'Test Answer',
-            'user-123'
         );
 
         $this->expectException(\InvalidArgumentException::class);
@@ -99,7 +96,6 @@ class LoggingMiddlewareTest extends TestCase
         $command = new CreateFlashcard(
             $longQuestion,
             'Test Answer',
-            'user-123'
         );
 
         $result = $commandBus->handle($command);
@@ -128,7 +124,6 @@ class LoggingMiddlewareTest extends TestCase
         $command = new CreateFlashcard(
             'Test Question',
             'Test Answer',
-            'user-123'
         );
 
         $result = $commandBus->handle($command);

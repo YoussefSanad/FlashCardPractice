@@ -103,7 +103,7 @@ class GetPracticeableQuestionsHandlerTest extends TestCase
 
         // Verify database state
         $this->assertDatabaseCount('flashcards', 3);
-        $this->assertDatabaseCount('practice_statuses', 3); // All should have status records
+        $this->assertDatabaseCount('practice_statuses', 2); // Only 2 created via SubmitAnswer
         $this->assertDatabaseCount('practice_attempts', 2); // Only 2 attempts made
     }
 
@@ -224,7 +224,7 @@ class GetPracticeableQuestionsHandlerTest extends TestCase
         $this->assertContains('Not Answered Question', $result->pluck('question')->toArray());
 
         // Verify database state
-        $this->assertDatabaseCount('practice_statuses', 3); // All should have status records
+        $this->assertDatabaseCount('practice_statuses', 2); // Only 2 created via SubmitAnswer
         $this->assertDatabaseCount('practice_attempts', 2); // Only 2 attempts made
     }
 

@@ -6,9 +6,6 @@ use App\Commands\CreateFlashcard;
 use App\Commands\ResetProgress;
 use App\Commands\SubmitAnswer;
 use App\Enums\Status;
-use App\Models\Flashcard;
-use App\Models\PracticeStatus;
-use App\Models\PracticeAttempt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use League\Tactician\CommandBus;
 use Tests\TestCase;
@@ -28,8 +25,8 @@ class ResetProgressHandlerTest extends TestCase
     public function test_can_reset_progress_successfully(): void
     {
         // Arrange
-        $flashcard1 = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
-        $flashcard2 = $this->commandBus->handle(new CreateFlashcard('What is PHP?', 'A programming language', 'user-123'));
+        $flashcard1 = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4'));
+        $flashcard2 = $this->commandBus->handle(new CreateFlashcard('What is PHP?', 'A programming language'));
 
         // Create practice statuses with different states by submitting answers
         $this->commandBus->handle(new SubmitAnswer($flashcard1->id, '4', 'user-123')); // Correct answer
@@ -59,8 +56,8 @@ class ResetProgressHandlerTest extends TestCase
     public function test_reset_progress_only_affects_target_user(): void
     {
         // Arrange
-        $flashcard1 = $this->commandBus->handle(new CreateFlashcard('Question 1', 'Answer 1', 'target-user'));
-        $flashcard2 = $this->commandBus->handle(new CreateFlashcard('Question 2', 'Answer 2', 'other-user'));
+        $flashcard1 = $this->commandBus->handle(new CreateFlashcard('Question 1', 'Answer 1'));
+        $flashcard2 = $this->commandBus->handle(new CreateFlashcard('Question 2', 'Answer 2'));
 
         // Create progress for target user
         $this->commandBus->handle(new SubmitAnswer($flashcard1->id, 'Answer 1', 'target-user')); // Correct answer
@@ -110,12 +107,12 @@ class ResetProgressHandlerTest extends TestCase
     public function test_reset_progress_with_mixed_statuses(): void
     {
         // Arrange
-        $flashcard1 = $this->commandBus->handle(new CreateFlashcard('Q1', 'A1', 'user-123'));
-        $flashcard2 = $this->commandBus->handle(new CreateFlashcard('Q2', 'A2', 'user-123'));
-        $flashcard3 = $this->commandBus->handle(new CreateFlashcard('Q3', 'A3', 'user-123'));
+        $flashcard1 = $this->commandBus->handle(new CreateFlashcard('Q1', 'A1'));
+        $flashcard2 = $this->commandBus->handle(new CreateFlashcard('Q2', 'A2'));
+        $flashcard3 = $this->commandBus->handle(new CreateFlashcard('Q3', 'A3'));
 
         // Create progress with different statuses by submitting answers
-        // flashcard1 will stay NOT_ANSWERED (we don't submit anything for it)
+        $this->commandBus->handle(new SubmitAnswer($flashcard1->id, 'Wrong answer', 'user-123')); // Incorrect answer
         $this->commandBus->handle(new SubmitAnswer($flashcard2->id, 'A2', 'user-123')); // Correct answer
         $this->commandBus->handle(new SubmitAnswer($flashcard3->id, 'Wrong answer', 'user-123')); // Incorrect answer
 
@@ -161,7 +158,7 @@ class ResetProgressHandlerTest extends TestCase
     public function test_reset_progress_with_multiple_users_same_flashcard(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('Shared Question', 'Shared Answer', 'user-1'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('Shared Question', 'Shared Answer'));
 
         // Create progress for multiple users on the same flashcard
         $this->commandBus->handle(new SubmitAnswer($flashcard->id, 'Shared Answer', 'user-1')); // Correct answer
@@ -197,7 +194,7 @@ class ResetProgressHandlerTest extends TestCase
     public function test_reset_progress_preserves_practice_attempts(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('Test Question', 'Test Answer', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('Test Question', 'Test Answer'));
 
         // Create practice attempts by submitting answers (these should not be affected by reset)
         $this->commandBus->handle(new SubmitAnswer($flashcard->id, 'Wrong Answer', 'user-123')); // Incorrect answer
@@ -236,7 +233,7 @@ class ResetProgressHandlerTest extends TestCase
     public function test_reset_progress_multiple_times_is_idempotent(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('Test Question', 'Test Answer', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('Test Question', 'Test Answer'));
 
         $this->commandBus->handle(new SubmitAnswer($flashcard->id, 'Test Answer', 'user-123')); // Correct answer
 

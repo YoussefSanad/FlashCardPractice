@@ -69,7 +69,7 @@ class GetQuestionsWithStatusHandlerTest extends TestCase
 
         // Verify database state
         $this->assertDatabaseCount('flashcards', 2);
-        $this->assertDatabaseCount('practice_statuses', 2); // Default statuses created
+        // Practice statuses are only created when users interact with flashcards
     }
 
     public function test_returns_questions_with_correct_status_after_practice(): void

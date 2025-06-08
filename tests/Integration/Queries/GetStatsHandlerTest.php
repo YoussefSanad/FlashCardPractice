@@ -65,7 +65,6 @@ class GetStatsHandlerTest extends TestCase
 
         // Verify database state
         $this->assertDatabaseCount('flashcards', 3);
-        $this->assertDatabaseCount('practice_statuses', 3); // Default statuses created
         $this->assertDatabaseCount('practice_attempts', 0); // No attempts made
     }
 

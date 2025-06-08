@@ -29,7 +29,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_submit_correct_answer_successfully(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4'));
         $command = new SubmitAnswer($flashcard->id, '4', 'user-123');
 
         // Act
@@ -58,7 +58,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_can_submit_incorrect_answer(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4'));
         $command = new SubmitAnswer($flashcard->id, '5', 'user-123');
 
         // Act
@@ -85,7 +85,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_case_insensitive_answer_comparison(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is PHP?', 'A programming language', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is PHP?', 'A programming language'));
         $command = new SubmitAnswer($flashcard->id, 'a programming language', 'user-123');
 
         // Act
@@ -98,7 +98,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_trims_whitespace_from_answer(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4'));
         $command = new SubmitAnswer($flashcard->id, '  4  ', 'user-123');
 
         // Act
@@ -115,7 +115,7 @@ class SubmitAnswerHandlerTest extends TestCase
     public function test_updates_existing_status_record(): void
     {
         // Arrange
-        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4', 'user-123'));
+        $flashcard = $this->commandBus->handle(new CreateFlashcard('What is 2+2?', '4'));
 
         // Create initial status (incorrect) by submitting a wrong answer first
         $this->commandBus->handle(new SubmitAnswer($flashcard->id, '5', 'user-123'));

@@ -27,8 +27,7 @@ class IdempotencyMiddlewareTest extends TestCase
 
         $command = new CreateFlashcard(
             'What is idempotency?',
-            'The ability to apply an operation multiple times without changing the result',
-            'user-123'
+            'The ability to apply an operation multiple times without changing the result'
         );
 
         $result = $commandBus->handle($command);
@@ -51,7 +50,6 @@ class IdempotencyMiddlewareTest extends TestCase
         $command = new CreateFlashcard(
             'What is idempotency?',
             'The ability to apply an operation multiple times without changing the result',
-            'user-123'
         );
 
         // Execute first time
@@ -80,7 +78,6 @@ class IdempotencyMiddlewareTest extends TestCase
         $command1 = new CreateFlashcard(
             'Question 1',
             'Answer 1',
-            'user-1'
         );
 
         $command2 = new CreateFlashcard(
@@ -96,32 +93,6 @@ class IdempotencyMiddlewareTest extends TestCase
         $this->assertNotEquals($result1->id, $result2->id);
         $this->assertEquals('Question 1', $result1->question);
         $this->assertEquals('Question 2', $result2->question);
-
-        // Should have two records in database
-        $this->assertDatabaseCount('flashcards', 2);
-    }
-
-    public function test_same_content_different_user_executes_separately(): void
-    {
-        $commandBus = $this->app->make(CommandBus::class);
-
-        $command1 = new CreateFlashcard(
-            'Shared Question',
-            'Shared Answer',
-            'user-1'
-        );
-
-        $command2 = new CreateFlashcard(
-            'Shared Question',
-            'Shared Answer',
-            'user-2' // Different user
-        );
-
-        $result1 = $commandBus->handle($command1);
-        $result2 = $commandBus->handle($command2);
-
-        // Different users should create separate flashcards
-        $this->assertNotEquals($result1->id, $result2->id);
 
         // Should have two records in database
         $this->assertDatabaseCount('flashcards', 2);

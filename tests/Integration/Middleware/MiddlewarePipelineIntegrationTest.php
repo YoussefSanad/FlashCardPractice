@@ -45,13 +45,6 @@ class MiddlewarePipelineIntegrationTest extends TestCase
             'answer' => 'Integration Test Answer',
         ]);
 
-        // Verify progress record created (Handler working)
-        $this->assertDatabaseHas('practice_statuses', [
-            'flashcard_id' => $result1->id,
-            'user_id' => 'pipeline-user',
-            'status' => 'not_answered',
-        ]);
-
         // Act - Second execution (should hit idempotency cache)
         $startTime = microtime(true);
         $result2 = $commandBus->handle($command);
@@ -67,7 +60,6 @@ class MiddlewarePipelineIntegrationTest extends TestCase
 
         // Should not create duplicate records
         $this->assertDatabaseCount('flashcards', 1);
-        $this->assertDatabaseCount('practice_statuses', 1);
     }
 
     public function test_middleware_pipeline_handles_failures_correctly(): void
@@ -89,7 +81,6 @@ class MiddlewarePipelineIntegrationTest extends TestCase
         } catch (\InvalidArgumentException $e) {
             // Verify transaction rollback - no records should be created
             $this->assertDatabaseCount('flashcards', 0);
-            $this->assertDatabaseCount('practice_statuses', 0);
 
             // Re-throw to satisfy expectException
             throw $e;
@@ -117,9 +108,7 @@ class MiddlewarePipelineIntegrationTest extends TestCase
         // Command 3 is identical to command 1 - should return cached result
         $this->assertEquals($result1->id, $result3->id);
 
-        // Should have 2 flashcards and 2 progress records (not 3)
         $this->assertDatabaseCount('flashcards', 2);
-        $this->assertDatabaseCount('practice_statuses', 2);
     }
 
     public function test_middleware_pipeline_preserves_model_relationships(): void
@@ -138,15 +127,6 @@ class MiddlewarePipelineIntegrationTest extends TestCase
         // Assert - Verify relationships work through the pipeline
         $this->assertInstanceOf(Flashcard::class, $flashcard);
 
-        // Load the progress relationship
-        $flashcard->load('practiceStatuses');
-        $this->assertTrue($flashcard->practiceStatuses->isNotEmpty());
-
-        $progress = $flashcard->practiceStatuses->first();
-        $this->assertInstanceOf(PracticeStatus::class, $progress);
-        $this->assertEquals('relationship-user', $progress->user_id);
-        $this->assertEquals('not_answered', $progress->status);
-        $this->assertEquals($flashcard->id, $progress->flashcard_id);
     }
 
     public function test_middleware_pipeline_caching_with_complex_data(): void
