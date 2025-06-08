@@ -15,7 +15,7 @@ A comprehensive flashcard practice application built with Laravel using CQRS (Co
 
 ## 🚀 Quick Start
 
-### 🐳 Docker with Laravel Sail (Recommended) - Ready to Go!
+### 🐳 Docker Setup (Recommended) - Ready to Go!
 
 This project is **pre-configured** for Docker! Just clone and run:
 
@@ -24,17 +24,22 @@ This project is **pre-configured** for Docker! Just clone and run:
 git clone <repository-url>
 cd FlashCardPractice
 
-# 2. Start Docker containers (Docker Desktop must be running)
-./vendor/bin/sail up -d
+# 2. Copy Docker environment configuration
+cp .env.docker .env
 
-# 3. Run database migrations
-./vendor/bin/sail artisan migrate
+# 3. Build and start Docker containers (Docker Desktop must be running)
+./docker/scripts/docker-up
 
-# 4. Start the flashcard application
-./vendor/bin/sail artisan flashcard:interactive
+# 4. Run database migrations
+./docker/scripts/migrate
+
+# 5. Start the flashcard application
+./docker/scripts/artisan flashcard:interactive
 ```
 
-**That's it!** 🎉 The `.env` file is already configured for Docker.
+**That's it!** 🎉 The application will be available at `http://localhost:8080`
+
+> **Note**: If you get a "Docker Compose not found" error, please install [Docker Desktop](https://www.docker.com/products/docker-desktop/) which includes Docker Compose.
 
 ### 💻 Local Development (Alternative)
 
@@ -118,71 +123,134 @@ The application uses the following key dependencies:
 - **Laravel Framework** - Core application framework
 - **PHPUnit** - Testing framework
 
-## 🐳 Docker Development with Laravel Sail
+## 🐳 Docker Development Setup
 
 ### ✅ Pre-configured Setup
 
-**This project is ready for Docker out of the box!** No configuration needed.
+**This project is ready for Docker out of the box!** Clean vanilla Docker setup without Laravel Sail.
 
 **What's included:**
-- ✅ `docker-compose.yml` - Laravel app + MySQL + Mailpit
-- ✅ `.env` file - Pre-configured for Docker
-- ✅ Laravel Sail - Installed and ready
+- ✅ `docker-compose.yml` - Laravel app + Nginx + MySQL + Redis
+- ✅ `Dockerfile` - Custom PHP 8.4-FPM container
+- ✅ `docker/nginx/nginx.conf` - Nginx configuration for Laravel
+- ✅ `docker/scripts/` - Helper scripts for common tasks
+- ✅ `.env.docker` - Pre-configured environment for Docker
 
 ### 🚀 Getting Started
 
 ```bash
 # Make sure Docker Desktop is running, then:
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail artisan flashcard:interactive
+cp .env.docker .env
+./docker/scripts/docker-up
+./docker/scripts/migrate
+./docker/scripts/artisan flashcard:interactive
 ```
 
-### Sail Alias (Recommended)
+### 🛠️ Docker Helper Scripts
 
-Add this alias to your shell configuration (`~/.zshrc` or `~/.bashrc`):
-
-```bash
-alias sail="./vendor/bin/sail"
-```
-
-Then reload your shell:
-```bash
-source ~/.zshrc  # or ~/.bashrc
-```
-
-Now you can use `sail` instead of `./vendor/bin/sail`:
+The project includes convenient helper scripts in `docker/scripts/`:
 
 ```bash
-# Start services
-sail up -d
-
 # Run artisan commands
-sail artisan migrate
-sail artisan flashcard:interactive
+./docker/scripts/artisan migrate
+./docker/scripts/artisan flashcard:interactive
 
 # Run composer commands
-sail composer install
+./docker/scripts/composer install
+./docker/scripts/composer update
 
-# Run tests
-sail test
+# Database operations
+./docker/scripts/migrate
+./docker/scripts/seed
+
+# Laravel Tinker
+./docker/scripts/tinker
+
+# Verify setup
+./docker/scripts/verify
+
+# Check for port conflicts
+./docker/scripts/check-ports
 ```
+
+### 🐳 Docker Services
+
+The setup includes the following services:
+
+- **app** - Laravel application (PHP 8.4-FPM)
+- **web** - Nginx web server (port 8080)
+- **mysql** - MySQL 8.0 database (port 3307)*
+- **redis** - Redis cache/session store (port 6380)*
+
+*External ports are mapped to non-standard ports to avoid conflicts with local services
 
 ### ⚙️ Environment Configuration
 
-✅ **No changes needed!** The `.env` file is pre-configured with:
+✅ **Copy `.env.docker` to `.env`** for Docker-ready configuration:
 
 ```env
+# Application
+APP_URL=http://localhost:8080
+
 # Database (Docker-ready)
 DB_CONNECTION=mysql
 DB_HOST=mysql              # Docker service name
-DB_USERNAME=sail           # Sail default
-DB_PASSWORD=password       # Sail default
+DB_USERNAME=laravel        # Docker MySQL user
+DB_PASSWORD=password       # Docker MySQL password
 
-# Mail testing (Docker-ready)
-MAIL_HOST=mailpit          # Docker service name
-MAIL_PORT=1025             # Mailpit port
+# Cache & Sessions
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+REDIS_HOST=redis           # Docker service name
 ```
+
+### 🔧 Common Docker Commands
+
+```bash
+# Build and start all services
+./docker/scripts/docker-up
+
+# View logs
+docker-compose logs -f  # or: docker compose logs -f
+
+# Stop all services
+./docker/scripts/docker-down
+
+# Rebuild a specific service
+docker-compose build app  # or: docker compose build app
+
+# Access container shell
+docker-compose exec app bash  # or: docker compose exec app bash
+
+# View running containers
+docker-compose ps  # or: docker compose ps
+```
+
+> **Note**: The helper scripts automatically detect whether to use `docker-compose` or `docker compose` based on your installation.
+
+### 🐛 Troubleshooting
+
+#### Port Conflicts
+If you get "port already in use" errors:
+
+```bash
+# Check what's using the ports
+./docker/scripts/check-ports
+
+# Stop local MySQL/Redis if running
+brew services stop mysql
+brew services stop redis
+
+# Or manually check specific ports
+lsof -i :3306
+lsof -i :6379
+```
+
+#### Common Issues
+- **MySQL port 3306 in use**: Our setup uses port 3307 externally to avoid conflicts
+- **Redis port 6379 in use**: Our setup uses port 6380 externally to avoid conflicts
+- **Permission errors**: Make sure Docker Desktop is running
+- **Build failures**: Try `docker system prune` to clean up Docker cache
 
 ## Usage
 
@@ -329,22 +397,22 @@ Current progress status per question.
 
 ```bash
 # Run all tests
-./vendor/bin/sail test
+./docker/scripts/artisan test
 
 # Run only unit tests
-./vendor/bin/sail test --testsuite=Unit
+./docker/scripts/artisan test --testsuite=Unit
 
 # Run only integration tests
-./vendor/bin/sail test --testsuite=Integration
+./docker/scripts/artisan test --testsuite=Integration
 
 # Run with coverage (requires Xdebug)
-./vendor/bin/sail test --coverage
+./docker/scripts/artisan test --coverage
 
 # Run specific test class
-./vendor/bin/sail test tests/Unit/CreateFlashcardCommandHandlerTest.php
+./docker/scripts/artisan test tests/Unit/CreateFlashcardCommandHandlerTest.php
 
 # Run tests in parallel (faster)
-./vendor/bin/sail test --parallel
+./docker/scripts/artisan test --parallel
 ```
 
 ### 💻 Running Tests Locally
@@ -356,7 +424,7 @@ php artisan test
 
 ### 🗄️ Test Environment
 
-**Docker**: Tests use MySQL test database automatically created by Sail
+**Docker**: Tests use MySQL test database in the Docker container
 **Local**: Tests use SQLite in-memory database for:
 - Fast execution
 - Isolation between tests

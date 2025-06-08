@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Stop Docker containers
+if command -v docker-compose &> /dev/null; then
+    echo "Using docker-compose..."
+    docker-compose down "$@"
+elif docker compose version &> /dev/null; then
+    echo "Using docker compose..."
+    docker compose down "$@"
+else
+    echo "Error: Docker Compose is not available."
+    echo "Please install Docker Desktop which includes Docker Compose."
+    exit 1
+fi 

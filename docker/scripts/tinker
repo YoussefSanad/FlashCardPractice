@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Run Laravel Tinker in the Docker container
+if command -v docker-compose &> /dev/null; then
+    docker-compose exec app php artisan tinker
+elif docker compose version &> /dev/null; then
+    docker compose exec app php artisan tinker
+else
+    echo "Error: Docker Compose is not available. Please install Docker Desktop or docker-compose."
+    exit 1
+fi 
