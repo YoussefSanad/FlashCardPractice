@@ -41,7 +41,6 @@ class IdempotencyMiddleware implements Middleware
         // In this app, commands are write operations, queries are read operations
         $writeCommands = [
             'App\Commands\CreateFlashcard',
-            'App\Commands\SubmitAnswer',
         ];
 
         return in_array(get_class($command), $writeCommands);
