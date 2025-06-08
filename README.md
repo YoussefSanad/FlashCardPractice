@@ -48,7 +48,7 @@ If you prefer to run each step manually:
 
 ```bash
 # 1. Clone the repository
-git clone <repository-url>
+git clone https://github.com/YoussefSanad/FlashCardPractice.git
 cd FlashCardPractice
 
 # 2. Copy Docker environment configuration
@@ -77,7 +77,7 @@ If you prefer to run without Docker:
 
 ```bash
 # Clone and setup
-git clone <repository-url>
+git clone https://github.com/YoussefSanad/FlashCardPractice.git
 cd FlashCardPractice
 
 # Install dependencies
