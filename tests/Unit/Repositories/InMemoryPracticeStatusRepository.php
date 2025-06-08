@@ -32,7 +32,7 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
         return $this->progressRecords;
     }
 
-    public function findByFlashcardAndUser(int $flashcardId, string $userId): ?PracticeStatus
+    public function findBy(int $flashcardId, string $userId): ?PracticeStatus
     {
         foreach ($this->progressRecords as $progress) {
             if ($progress->flashcard_id === $flashcardId && $progress->user_id === $userId) {
@@ -42,7 +42,7 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
         return null;
     }
 
-    public function countNonNotAnsweredByUserId(string $userId): int
+    public function countAttemptedFor(string $userId): int
     {
         $count = 0;
         foreach ($this->progressRecords as $progress) {
@@ -53,7 +53,7 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
         return $count;
     }
 
-    public function resetProgressByUserId(string $userId): int
+    public function resetFor(string $userId): int
     {
         $updated = 0;
         foreach ($this->progressRecords as $progress) {
@@ -66,23 +66,12 @@ class InMemoryPracticeStatusRepository implements PracticeStatusRepository
         return $updated;
     }
 
-    public function updateProgress(PracticeStatus $progress, string $status, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
+    public function updateStatus(PracticeStatus $practiceStatus, string $newStatus, ?\DateTimeImmutable $lastAttemptedAt = null): PracticeStatus
     {
-        $progress->status = $status;
-        $progress->last_attempted_at = $lastAttemptedAt;
+        $practiceStatus->status = $newStatus;
+        $practiceStatus->last_attempted_at = $lastAttemptedAt;
 
-        return $progress;
-    }
-
-    public function countAllAttempts(string $userId): int
-    {
-        $count = 0;
-        foreach ($this->progressRecords as $progress) {
-            if ($progress->user_id === $userId && $progress->status !== PracticeStatus::STATUS_NOT_ANSWERED) {
-                $count++;
-            }
-        }
-        return $count;
+        return $practiceStatus;
     }
 
     public function countCorrectAttempts(string $userId): int

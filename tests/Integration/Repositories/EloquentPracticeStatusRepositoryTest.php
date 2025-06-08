@@ -145,13 +145,13 @@ class EloquentPracticeStatusRepositoryTest extends TestCase
         $this->repository->create($flashcard4->id, 'user-2', PracticeStatus::STATUS_CORRECT);
 
         // Assert
-        $count = $this->repository->countNonNotAnsweredByUserId('user-1');
+        $count = $this->repository->countAttemptedFor('user-1');
         $this->assertEquals(2, $count); // Only CORRECT and INCORRECT, not NOT_ANSWERED
 
-        $count = $this->repository->countNonNotAnsweredByUserId('user-2');
+        $count = $this->repository->countAttemptedFor('user-2');
         $this->assertEquals(1, $count);
 
-        $count = $this->repository->countNonNotAnsweredByUserId('nonexistent-user');
+        $count = $this->repository->countAttemptedFor('nonexistent-user');
         $this->assertEquals(0, $count);
     }
 
@@ -185,7 +185,7 @@ class EloquentPracticeStatusRepositoryTest extends TestCase
         ]);
 
         // Act
-        $updatedCount = $this->repository->resetProgressByUserId('user-1');
+        $updatedCount = $this->repository->resetFor('user-1');
 
         // Assert
         $this->assertEquals(2, $updatedCount);
@@ -210,7 +210,7 @@ class EloquentPracticeStatusRepositoryTest extends TestCase
         $flashcard = Flashcard::create(['question' => 'Q1', 'answer' => 'A1']);
         $this->repository->create($flashcard->id, 'user-1', PracticeStatus::STATUS_CORRECT);
 
-        $updatedCount = $this->repository->resetProgressByUserId('nonexistent-user');
+        $updatedCount = $this->repository->resetFor('nonexistent-user');
 
         $this->assertEquals(0, $updatedCount);
     }
@@ -225,18 +225,18 @@ class EloquentPracticeStatusRepositoryTest extends TestCase
         $progress3 = $this->repository->create($flashcard1->id, 'user-2', PracticeStatus::STATUS_NOT_ANSWERED);
 
         // Test finding existing progress
-        $found = $this->repository->findByFlashcardAndUser($flashcard1->id, 'user-1');
+        $found = $this->repository->findBy($flashcard1->id, 'user-1');
         $this->assertNotNull($found);
         $this->assertEquals($progress1->id, $found->id);
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $found->status);
 
         // Test finding different user
-        $found = $this->repository->findByFlashcardAndUser($flashcard1->id, 'user-2');
+        $found = $this->repository->findBy($flashcard1->id, 'user-2');
         $this->assertNotNull($found);
         $this->assertEquals($progress3->id, $found->id);
 
         // Test finding non-existent combination
-        $found = $this->repository->findByFlashcardAndUser($flashcard2->id, 'user-2');
+        $found = $this->repository->findBy($flashcard2->id, 'user-2');
         $this->assertNull($found);
     }
 
@@ -246,7 +246,7 @@ class EloquentPracticeStatusRepositoryTest extends TestCase
         $progress = $this->repository->create($flashcard->id, 'user-1', PracticeStatus::STATUS_NOT_ANSWERED);
 
         $lastAttemptedAt = new \DateTimeImmutable();
-        $updatedProgress = $this->repository->updateProgress($progress, PracticeStatus::STATUS_CORRECT, $lastAttemptedAt);
+        $updatedProgress = $this->repository->updateStatus($progress, PracticeStatus::STATUS_CORRECT, $lastAttemptedAt);
 
         $this->assertEquals($progress->id, $updatedProgress->id);
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $updatedProgress->status);
@@ -264,7 +264,7 @@ class EloquentPracticeStatusRepositoryTest extends TestCase
         $flashcard = Flashcard::create(['question' => 'Q1', 'answer' => 'A1']);
         $progress = $this->repository->create($flashcard->id, 'user-1', PracticeStatus::STATUS_CORRECT, new \DateTimeImmutable());
 
-        $updatedProgress = $this->repository->updateProgress($progress, PracticeStatus::STATUS_INCORRECT);
+        $updatedProgress = $this->repository->updateStatus($progress, PracticeStatus::STATUS_INCORRECT);
 
         $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $updatedProgress->status);
         $this->assertNull($updatedProgress->last_attempted_at);

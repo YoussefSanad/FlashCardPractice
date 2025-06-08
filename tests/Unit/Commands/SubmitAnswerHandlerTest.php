@@ -249,8 +249,8 @@ class SubmitAnswerHandlerTest extends TestCase
         $progressRecords = $this->practiceStatuses->getAll();
         $this->assertCount(2, $progressRecords);
 
-        $progress1 = $this->practiceStatuses->findByFlashcardAndUser($flashcard->id, 'user-1');
-        $progress2 = $this->practiceStatuses->findByFlashcardAndUser($flashcard->id, 'user-2');
+        $progress1 = $this->practiceStatuses->findBy($flashcard->id, 'user-1');
+        $progress2 = $this->practiceStatuses->findBy($flashcard->id, 'user-2');
 
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress1->status);
         $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $progress2->status);
@@ -279,7 +279,7 @@ class SubmitAnswerHandlerTest extends TestCase
         $this->assertTrue($result['is_correct']);
 
         // Verify final progress is correct
-        $progress = $this->practiceStatuses->findByFlashcardAndUser($flashcard->id, 'user-123');
+        $progress = $this->practiceStatuses->findBy($flashcard->id, 'user-123');
         $this->assertEquals(PracticeStatus::STATUS_CORRECT, $progress->status);
 
         // Verify both attempts were recorded

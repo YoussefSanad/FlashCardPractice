@@ -59,9 +59,9 @@ class InMemoryFlashcardRepository implements FlashcardRepository
     {
         return array_map(function ($flashcard) use ($userId) {
             $status = PracticeStatus::STATUS_NOT_ANSWERED;
-            
+
             if ($this->practiceStatusRepository) {
-                $practiceStatus = $this->practiceStatusRepository->findByFlashcardAndUser($flashcard->id, $userId);
+                $practiceStatus = $this->practiceStatusRepository->findBy($flashcard->id, $userId);
                 if ($practiceStatus) {
                     $status = $practiceStatus->status;
                 }

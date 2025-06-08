@@ -12,7 +12,7 @@ class CreateFlashcardHandler
 {
     public function __construct(
         private readonly FlashcardRepository $flashcards,
-        private readonly PracticeStatusRepository $questionProgress
+        private readonly PracticeStatusRepository $practiceStatuses
     ) {}
 
     public function handle(CreateFlashcard $command): Flashcard
@@ -23,8 +23,7 @@ class CreateFlashcardHandler
             trim($command->answer)
         );
 
-        // Create initial progress record
-        $this->questionProgress->create(
+        $this->practiceStatuses->create(
             $flashcard->id,
             $command->userId,
             PracticeStatus::STATUS_NOT_ANSWERED

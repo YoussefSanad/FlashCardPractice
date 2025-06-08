@@ -6,6 +6,7 @@ use App\Exceptions\EmptyAnswer;
 use App\Exceptions\FlashcardNotFound;
 use App\Exceptions\InvalidFlashcardId;
 use App\Exceptions\QuestionAlreadyAnsweredCorrectly;
+use App\Models\Flashcard;
 use App\Models\PracticeStatus;
 use App\Repositories\FlashcardRepository;
 use App\Repositories\PracticeAttemptRepository;
@@ -17,7 +18,7 @@ class SubmitAnswerHandler
     public function __construct(
         private readonly FlashcardRepository       $flashcards,
         private readonly PracticeAttemptRepository $practiceAttempts,
-        private readonly PracticeStatusRepository  $questionProgress,
+        private readonly PracticeStatusRepository  $practiceStatuses,
         private readonly Clock                     $clock
     ) {}
 
@@ -26,9 +27,9 @@ class SubmitAnswerHandler
         $this->validateInput($command);
 
         $flashcard = $this->flashcards->findById($command->flashcardId);
-        $progress = $this->questionProgress->findByFlashcardAndUser($command->flashcardId, $command->userId);
+        $practiceStatus = $this->practiceStatuses->findBy($command->flashcardId, $command->userId);
 
-        $this->validateBusinessRules($flashcard, $progress, $command->flashcardId);
+        $this->validateBusinessRules($flashcard, $practiceStatus, $command->flashcardId);
 
         $userAnswer = trim($command->userAnswer);
         $isCorrect = strcasecmp($userAnswer, $flashcard->answer) === 0;
@@ -41,10 +42,10 @@ class SubmitAnswerHandler
         );
 
         $newStatus = $isCorrect ? PracticeStatus::STATUS_CORRECT : PracticeStatus::STATUS_INCORRECT;
-        if ($progress) {
-            $this->questionProgress->updateProgress($progress, $newStatus, $this->clock->now());
+        if ($practiceStatus) {
+            $this->practiceStatuses->updateStatus($practiceStatus, $newStatus, $this->clock->now());
         } else {
-            $this->questionProgress->create($flashcard->id, $command->userId, $newStatus, $this->clock->now());
+            $this->practiceStatuses->create($flashcard->id, $command->userId, $newStatus, $this->clock->now());
         }
 
         return [
@@ -64,13 +65,13 @@ class SubmitAnswerHandler
         }
     }
 
-    private function validateBusinessRules(?object $flashcard, ?object $progress, int $flashcardId): void
+    private function validateBusinessRules(?Flashcard $flashcard, ?PracticeStatus $practiceStatus, int $flashcardId): void
     {
         if ($flashcard === null) {
             throw new FlashcardNotFound($flashcardId);
         }
 
-        if ($progress && $progress->status === PracticeStatus::STATUS_CORRECT) {
+        if ($practiceStatus && $practiceStatus->status === PracticeStatus::STATUS_CORRECT) {
             throw new QuestionAlreadyAnsweredCorrectly($flashcardId);
         }
     }

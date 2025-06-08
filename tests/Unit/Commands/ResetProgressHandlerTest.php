@@ -81,8 +81,8 @@ class ResetProgressHandlerTest extends TestCase
         $this->handler->handle($command);
 
         // Assert - Check progress records
-        $targetProgress = $this->practiceStatuses->findByFlashcardAndUser(1, $targetUser);
-        $otherProgress = $this->practiceStatuses->findByFlashcardAndUser(2, $otherUser);
+        $targetProgress = $this->practiceStatuses->findBy(1, $targetUser);
+        $otherProgress = $this->practiceStatuses->findBy(2, $otherUser);
 
         $this->assertEquals(PracticeStatus::STATUS_NOT_ANSWERED, $targetProgress->status);
         $this->assertEquals(PracticeStatus::STATUS_INCORRECT, $otherProgress->status);

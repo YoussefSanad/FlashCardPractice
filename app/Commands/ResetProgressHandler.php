@@ -8,11 +8,11 @@ use App\Repositories\PracticeStatusRepository;
 class ResetProgressHandler
 {
     public function __construct(
-        private readonly PracticeStatusRepository $questionProgress
+        private readonly PracticeStatusRepository $practiceStatuses
     ) {}
 
     public function handle(ResetProgress $command): void
     {
-        $this->questionProgress->resetProgressByUserId($command->userId);
+        $this->practiceStatuses->resetFor($command->userId);
     }
 }

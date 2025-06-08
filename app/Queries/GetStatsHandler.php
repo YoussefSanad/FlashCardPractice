@@ -26,7 +26,7 @@ class GetStatsHandler
             ];
         }
 
-        $attemptedCount = $this->practiceStatuses->countAllAttempts($query->userId);
+        $attemptedCount = $this->practiceStatuses->countAttemptedFor($query->userId);
         $correctCount = $this->practiceStatuses->countCorrectAttempts($query->userId);
 
         $attemptedPercentage = round(($attemptedCount / $totalQuestions) * 100, 1);
