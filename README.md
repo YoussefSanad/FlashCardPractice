@@ -30,10 +30,16 @@ cp .env.docker .env
 # 3. Build and start Docker containers (Docker Desktop must be running)
 ./docker/scripts/docker-up
 
-# 4. Run database migrations
+# 4. Install PHP dependencies (IMPORTANT: Run this first!)
+./docker/scripts/composer install
+
+# 5. Run database migrations
 ./docker/scripts/migrate
 
-# 5. Start the flashcard application
+# 6. Run tests to verify everything is working
+./docker/scripts/artisan test
+
+# 7. Start the flashcard application
 ./docker/scripts/artisan flashcard:interactive
 ```
 
@@ -142,7 +148,9 @@ The application uses the following key dependencies:
 # Make sure Docker Desktop is running, then:
 cp .env.docker .env
 ./docker/scripts/docker-up
+./docker/scripts/composer install  # IMPORTANT: Install dependencies first!
 ./docker/scripts/migrate
+./docker/scripts/artisan test      # Verify everything is working
 ./docker/scripts/artisan flashcard:interactive
 ```
 
@@ -247,6 +255,8 @@ lsof -i :6379
 ```
 
 #### Common Issues
+- **"Failed to open stream: No such file or directory" (vendor/autoload.php)**: 
+  Run `./docker/scripts/composer install` to install PHP dependencies first
 - **MySQL port 3306 in use**: Our setup uses port 3307 externally to avoid conflicts
 - **Redis port 6379 in use**: Our setup uses port 6380 externally to avoid conflicts
 - **Permission errors**: Make sure Docker Desktop is running

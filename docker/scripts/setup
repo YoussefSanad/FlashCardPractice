@@ -63,15 +63,24 @@ else
     docker compose ps
 fi
 
+# Install PHP dependencies
+echo "📦 Installing PHP dependencies..."
+./docker/scripts/composer install
+echo "✅ PHP dependencies installed"
+
 # Run migrations
 echo "🗄️  Running database migrations..."
 ./docker/scripts/migrate
+
+# Run tests to verify everything is working
+echo "🧪 Running tests to verify setup..."
+./docker/scripts/artisan test
+echo "✅ All tests passed - setup verified!"
 
 echo ""
 echo "🎉 Setup complete!"
 echo ""
 echo "📋 Next steps:"
-echo "   • Application is available at: http://localhost:8080"
 echo "   • Start the flashcard app: ./docker/scripts/artisan flashcard:interactive"
 echo "   • View logs: $COMPOSE_CMD logs -f"
 echo "   • Stop containers: ./docker/scripts/docker-down"
@@ -80,5 +89,4 @@ echo "🛠️  Available helper scripts:"
 echo "   • ./docker/scripts/artisan [command]  - Run Artisan commands"
 echo "   • ./docker/scripts/composer [command] - Run Composer commands"
 echo "   • ./docker/scripts/migrate           - Run database migrations"
-echo "   • ./docker/scripts/seed              - Run database seeders"
 echo "   • ./docker/scripts/tinker            - Start Laravel Tinker" 
