@@ -58,4 +58,9 @@ class EloquentFlashcardRepository implements FlashcardRepository
                   ->where('status', Status::CORRECT->value);
         })->get();
     }
+
+    public function delete(int $id): bool
+    {
+        return Flashcard::destroy($id);
+    }
 }

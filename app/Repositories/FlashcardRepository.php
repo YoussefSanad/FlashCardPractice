@@ -11,7 +11,7 @@ interface FlashcardRepository
     public function all(): Collection;
 
     public function create(string $question, string $answer): Flashcard;
-    
+
     public function findById(int $id): ?Flashcard;
 
     public function count(): int;
@@ -22,4 +22,6 @@ interface FlashcardRepository
     public function getWithStatus(string $userId): array;
 
     public function getPracticable(string $userId): Collection;
-} 
+
+    public function delete(int $id): bool;
+}
