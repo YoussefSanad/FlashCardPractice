@@ -2,10 +2,9 @@
 
 namespace App\Commands;
 
-class CreateFlashcard implements RequiresTransaction
+class DeleteFlashcard implements RequiresTransaction
 {
     public function __construct(
-        public readonly string $question,
-        public readonly string $answer
+        public readonly int $id,
     ) {}
 }
