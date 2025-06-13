@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Commands\CreateFlashcard;
 use App\Commands\CreateFlashcardHandler;
+use App\Commands\DeleteFlashcard;
+use App\Commands\DeleteFlashcardHandler;
 use App\Commands\ResetProgress;
 use App\Commands\ResetProgressHandler;
 use App\Commands\SubmitAnswer;
@@ -40,6 +42,7 @@ class CqrsServiceProvider extends ServiceProvider
             $locator->addHandler($app->make(CreateFlashcardHandler::class), CreateFlashcard::class);
             $locator->addHandler($app->make(SubmitAnswerHandler::class), SubmitAnswer::class);
             $locator->addHandler($app->make(ResetProgressHandler::class), ResetProgress::class);
+            $locator->addHandler($app->make(DeleteFlashcardHandler::class), DeleteFlashcard::class);
 
             // Register query handlers
             $locator->addHandler($app->make(GetAllFlashcardsHandler::class), GetAllFlashcards::class);
