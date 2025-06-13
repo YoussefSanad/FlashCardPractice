@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Views;
+namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
@@ -13,17 +13,57 @@ class MainMenu extends Command
      */
     protected $signature = 'flashcard:main-menu';
 
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Display the flashcard application main menu';
 
+    /**
+     * Menu options configuration
+     *
+     * @var array
+     */
+    private array $menuOptions = [
+        '1' => 'Create a flashcard',
+        '2' => 'List all flashcards', 
+        '3' => 'Practice',
+        '4' => 'Stats',
+        '5' => 'Reset',
+        '6' => 'Exit',
+        '7' => 'Delete Flashcard',
+    ];
+
+    /**
+     * Execute the console command.
+     */
     public function handle(): void
     {
+        $this->displayMenu();
+    }
+
+    /**
+     * Display the main menu options
+     */
+    private function displayMenu(): void
+    {
         $this->line('📚 Main Menu:');
-        $this->line('1. Create a flashcard');
-        $this->line('2. List all flashcards');
-        $this->line('3. Practice');
-        $this->line('4. Stats');
-        $this->line('5. Reset');
-        $this->line('6. Exit');
-        $this->line('7. Delete Flashcard');
+        
+        foreach ($this->menuOptions as $key => $option) {
+            $this->line("{$key}. {$option}");
+        }
+        
         $this->newLine();
+    }
+
+    /**
+     * Get available menu options
+     *
+     * @return array
+     */
+    public function getMenuOptions(): array
+    {
+        return $this->menuOptions;
     }
 }
